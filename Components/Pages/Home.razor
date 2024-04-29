@@ -1,7 +1,41 @@
 ﻿@page "/"
+@using InCaseIForgetMyCrochet.Models
+@using Microsoft.EntityFrameworkCore
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container">
+    <h1>Welcome</h1>
+    <div class="container">
+        @if (patterns != null)
+        {
+            <ul>
+                @foreach (var pattern in patterns)
+                {
+                    <li>@pattern.Name</li>
+                    <ol>
+                        @foreach (var instruction in pattern.Instructions)
+                        {
+                            <li>@instruction.StitchCount @instruction.StitchType</li>
+                        }
+                    </ol>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+</div>
 
-Welcome to your new app.
+@code {
+    List<Pattern>? patterns { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = new PatternDbContext();
+        patterns = await context.Patterns
+        .Include(p => p.Instructions)
+        .ToListAsync();
+    }
+}

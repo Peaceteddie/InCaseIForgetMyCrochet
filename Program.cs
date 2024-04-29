@@ -1,10 +1,15 @@
+using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Components;
+
+Seed.Run();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<PatternDbContext>();
 
 var app = builder.Build();
 
