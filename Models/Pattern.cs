@@ -12,7 +12,8 @@ public class Pattern
 
 public class Instruction
 {
+    // int Id, int StitchCount, string StitchType
     [Key] public int Id { get; set; }
-    [Required] public int StitchCount { get; set; }
-    [Required] public required string StitchType { get; set; }
+    public int StitchCount = 0;
+    public string StitchType = "";
 }
