@@ -1,105 +1,124 @@
 ﻿@page "/"
+@using InCaseIForgetMyCrochet
 @using InCaseIForgetMyCrochet.Models
+@using InCaseIForgetMyCrochet.Services
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Web
+@inject PatternService patternService
+
+@implements IDisposable
 @rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
-
-<div class="container">
-    <h1>Welcome</h1>
-    <div class="container">
-        @if (patterns != null)
-        {
-            <ul>
+<div class="container d-flex flex-column gap-5">
+    <h1>Home</h1>
+    <div class="d-flex gap-5">
+        <ul class="list-group">
+            @if (patterns != null)
+            {
                 @foreach (var pattern in patterns)
                 {
-                    <li>@pattern.Name</li>
-                    <ol>
-                        @foreach (var instruction in pattern.Instructions)
-                        {
-                            <div>
-                                <input class="col-1" type="number" @bind-value="@instruction.StitchCount" />
-                                <input class="col-1" type="text" @bind-value="@instruction.StitchType" />
-                                <button type="button" class="btn btn-danger"
-                                    @onclick="() => pattern.Instructions.Remove(instruction)">Remove</button>
-                            </div>
-                        }
-                    </ol>
-                    <div class="d-flex flex-row">
-                        <input class="col-1" type="number" @bind-value="@RepeatCount" />
-                        <button type="button" class="btn btn-primary"
-                            @onclick="() => pattern.Instructions.Add(new Instruction())">Add Empty</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() => 
-                            pattern.Instructions.Add(new Instruction(){
-                                StitchCount = @RepeatCount,
-                                StitchType = "sc"
-                            }))">Add SC</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "dc"
-                            }))">Add DC</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "hdc"
-                            }))">Add HDC</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "tc"
-                            }))">Add TC</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "sl st"
-                            }))">Add SL ST</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "ch"
-                            }))">Add CH</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "inc"
-                            }))">Add INC</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "dec"
-                            }))">Add DEC</button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() =>
-                            pattern.Instructions.Add(new Instruction()
-                            {
-                                StitchCount = @RepeatCount,
-                                StitchType = "rep"
-                            }))">Add REP</button>
-                    </div>
+                    <li class="list-group-item" style="width:15vw;">
+                        <button class="btn btn-primary w-100" @onclick="@(() => {this.pattern = pattern; StateHasChanged();})">
+                            <h4>@pattern.Name</h4>
+                        </button>
+                    </li>
                 }
-            </ul>
+            }
+        </ul>
+        @if (pattern != null)
+        {
+            <EditForm class="container" Model="@pattern" OnFieldChanged="HandleFieldChanged">
+                <h2>@pattern.Name</h2>
+                <ul class="list-group">
+                    @foreach (var row in pattern.Rows)
+                    {
+                        <li class="list-group-item">
+                            <ul class="list-group">
+                                @foreach (var instruction in row.Instructions)
+                                {
+                                    <div class="list-group-item" style="display: flex; justify-content: space-between;">
+                                        <InputNumber @bind-Value="instruction.StitchCount" class="form-control" />
+                                        <InputSelect @bind-Value="instruction.StitchType" class="form-control">
+                                            @foreach (var stitch in Enum.GetValues<StitchTypeAbbreviation>())
+                                            {
+                                                <option value="@stitch">@stitch</option>
+                                            }
+                                        </InputSelect>
+                                        <button class="btn btn-danger" @onclick="@(() => row.Instructions.Remove(instruction))"
+                                            @onkeyup="@(e => {if (e.Key == "Enter") { return; }})">Remove</button>
+                                    </div>
+                                } @* End of Instructions *@
+                                <label for="amountStitches">Amount of Stitches</label>
+                                <InputNumber id="amountStitches" @bind-Value="amountStitches" class="form-control"
+                                    @onkeyup="@(e => {if (e.Key == "Enter") { return; }} )" />
+                                <label for="typeStitches">Type of Stitches</label>
+                                <div class="d-flex flex-wrap gap-1 justify-content-center" id="typeStitches">
+                                    @foreach (var stitch in Enum.GetValues<StitchTypeAbbreviation>())
+                                    {
+                                        <button class="btn btn-primary"
+                                            @onclick="@(() => row.Instructions.Add(new Instruction { StitchCount = amountStitches, StitchType = stitch }))">@stitch</button>
+                                    }
+                                </div>
+                            </ul>
+                            <button class="btn btn-danger" @onclick="@(() => pattern.Rows.Remove(row))">Remove Row</button>
+                        </li>
+                    } @* End of Rows *@
+                    <button class=" btn btn-primary col-2"
+                        @onclick="() => pattern.Rows.Add(new Row { Instructions = new List<Instruction>() })">Add
+                        Row</button>
+                </ul>
+            </EditForm>
         }
     </div>
 </div>
-
 @code {
-    int RepeatCount = 1;
-    Pattern? pattern { get; set; }
+    Pattern? pattern { get; set; } = null;
     List<Pattern>? patterns { get; set; }
-
+    int amountStitches { get; set; } = 1;
+    Stack<Pattern> saveRequests = new();
+    Timer? saveTimer;
 
     protected override async Task OnInitializedAsync()
     {
+        patterns = await patternService.GetPatterns();
+        saveTimer = new Timer(async _ =>
+        {
+            if (saveRequests.Count > 0)
+            {
+                using var context = new PatternDbContext();
+                while (saveRequests.Count > 0)
+                {
+                    var pattern = saveRequests.Pop();
+                    context.Update(pattern);
+                }
+                await context.SaveChangesAsync();
+            }
+        }, null, 0, 1000);
+    }
+
+    private void HandleFieldChanged(FieldChangedEventArgs e)
+    {
+        if (pattern is not null)
+            patternService.HandleFieldChanged(pattern);
+    }
+
+    public void Dispose()
+    {
+        saveTimer?.Dispose();
         using var context = new PatternDbContext();
-        patterns = await context.Patterns
-        .Include(p => p.Instructions)
-        .ToListAsync();
+        context.SaveChanges();
     }
 }
+<style>
+    button {
+        border-radius: 1rem;
+        padding: 0.1rem 1rem;
+    }
+
+    #typeStitches {
+        align-self: center;
+        min-width: 50%;
+        width: 70%;
+        max-width: 100%;
+    }
+</style>

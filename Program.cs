@@ -1,5 +1,6 @@
 using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Components;
+using InCaseIForgetMyCrochet.Services;
 
 Seed.Run();
 
@@ -10,6 +11,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddDbContext<PatternDbContext>();
+
+builder.Services.AddScoped<PatternService>();
 
 var app = builder.Build();
 
