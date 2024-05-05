@@ -2,7 +2,8 @@ using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Components;
 using InCaseIForgetMyCrochet.Services;
 
-Seed.Run();
+Environment.SetEnvironmentVariable("ICIFMC_BasePath", Directory.GetCurrentDirectory());
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
+    Seed.Run();
 }
 
 app.UseHttpsRedirection();

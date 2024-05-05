@@ -7,7 +7,7 @@ public class PatternService()
 {
     internal readonly Stack<Pattern> _saveRequests = new();
 
-    public async Task<List<Pattern>> GetPatterns()
+    public async Task<List<Pattern>> GetPatternsAsync()
     {
         using PatternDbContext _context = new();
         return await _context.Patterns
@@ -21,15 +21,14 @@ public class PatternService()
         _saveRequests.Push(pattern);
     }
 
-    public void SaveChanges()
+    public async Task SaveChangesAsync()
     {
         using PatternDbContext _context = new();
         while (_saveRequests.Count > 0)
         {
             var pattern = _saveRequests.Pop();
-            if (pattern == null) continue;
-            _context.Update(pattern);
+            _context.Patterns.Update(pattern);
         }
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }

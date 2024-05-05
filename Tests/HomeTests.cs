@@ -1,6 +1,6 @@
-using InCaseIForgetMyCrochet.Components.Pages;
 using InCaseIForgetMyCrochet.Models;
 using InCaseIForgetMyCrochet.Services;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace InCaseIForgetMyCrochet.Tests;
@@ -10,19 +10,30 @@ public class PatternServiceTests
 
     public PatternServiceTests()
     {
+        using PatternDbContext _context = new();
+        _context.Database.EnsureDeleted();
+        _context.Database.EnsureCreated();
+
         _patternService = new PatternService();
     }
 
     [Fact]
-    public void ShouldSaveWhenFieldChanged()
+    public async Task ShouldSaveWhenFieldChanged()
     {
+        // Setup
+        using PatternDbContext context = new();
         var pattern = new Pattern
         {
             Name = "MyPattern"
         };
-        _patternService.HandleFieldChanged(pattern);
-        _patternService.SaveChanges();
-        Assert.Empty(_patternService._saveRequests);
-    }
 
+        // Act
+        _patternService.HandleFieldChanged(pattern);
+        await _patternService.SaveChangesAsync();
+
+        // Assert
+        Assert.Empty(_patternService._saveRequests);
+        var savedPattern = await context.Patterns.FirstAsync();
+        Assert.Equal(pattern.Name, savedPattern.Name);
+    }
 }

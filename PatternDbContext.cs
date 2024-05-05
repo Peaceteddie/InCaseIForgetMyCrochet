@@ -1,21 +1,26 @@
 using InCaseIForgetMyCrochet.Models;
 using Microsoft.EntityFrameworkCore;
-using dotenv.net;
+using DotNetEnv;
 
-namespace InCaseIForgetMyCrochet
+namespace InCaseIForgetMyCrochet;
+public class PatternDbContext : DbContext
 {
-    public class PatternDbContext : DbContext
+    public PatternDbContext() { }
+    public PatternDbContext(DbContextOptions options) : base(options) { }
+
+    public DbSet<Pattern> Patterns { get; set; }
+
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        public PatternDbContext() { }
-        public PatternDbContext(DbContextOptions options) : base(options) { }
-
-        public DbSet<Pattern> Patterns { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            DotEnv.Load();
-            var dotEnv = DotEnv.Read().Inspect();
-            optionsBuilder.UseNpgsql($"Host={dotEnv["POSTGRES_HOST"]};Port={dotEnv["POSTGRES_PORT"]};Database={dotEnv["POSTGRES_DB"]};Username={dotEnv["POSTGRES_USER"]};Password={dotEnv["POSTGRES_PASSWORD"]}");
-        }
+        IEnumerable<KeyValuePair<string, string>>? dotEnv = Env.TraversePath().Load();
+        if (dotEnv != null)
+            optionsBuilder.UseNpgsql(@$"
+            Host={Env.GetString("POSTGRES_HOST")};
+            Port={Env.GetString("POSTGRES_PORT")};
+            Database={Env.GetString("POSTGRES_DB")};
+            Username={Env.GetString("POSTGRES_USER")};
+            Password={Env.GetString("POSTGRES_PASSWORD")};
+            ");
     }
 }

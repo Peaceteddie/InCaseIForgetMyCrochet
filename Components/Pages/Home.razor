@@ -75,25 +75,18 @@
     Pattern? pattern { get; set; } = null;
     List<Pattern>? patterns { get; set; }
     int amountStitches { get; set; } = 1;
-    Stack<Pattern> saveRequests = new();
     Timer? saveTimer;
 
     protected override async Task OnInitializedAsync()
     {
-        patterns = await patternService.GetPatterns();
+    @inject PatternService patternService
+        patterns = await patternService.GetPatternsAsync();
+
         saveTimer = new Timer(async _ =>
         {
-            if (saveRequests.Count > 0)
-            {
-                using var context = new PatternDbContext();
-                while (saveRequests.Count > 0)
-                {
-                    var pattern = saveRequests.Pop();
-                    context.Update(pattern);
-                }
-                await context.SaveChangesAsync();
-            }
-        }, null, 0, 1000);
+            if (pattern is not null)
+                await patternService.SaveChangesAsync();
+        }, null, 0, 5000);
     }
 
     private void HandleFieldChanged(FieldChangedEventArgs e)
