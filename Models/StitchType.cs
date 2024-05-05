@@ -92,4 +92,30 @@ public static class StitchTypeExtensions
             StitchType.BackPostSingleCrochet => StitchTypeAbbreviation.bpsc,
             _ => throw new NotImplementedException()
         };
+
+    // match pastel colors in hex format to each stitch type abbreviation. So take all the stitch type abbreviations and match them to a pastel color in hex format. using the formula for the pastel colors and human perception of color.
+    public static string ToPastelColor(this StitchTypeAbbreviation abbreviation) =>
+    abbreviation switch
+    {
+        StitchTypeAbbreviation.ch => "#F7E7CE",
+        StitchTypeAbbreviation.sc => "#FFC8A2",
+        StitchTypeAbbreviation.dc => "#FFA07A",
+        StitchTypeAbbreviation.hdc => "#FF7F50",
+        StitchTypeAbbreviation.tr => "#FF6347",
+        StitchTypeAbbreviation.slst => "#FF4500",
+        StitchTypeAbbreviation.inc => "#FFD700",
+        StitchTypeAbbreviation.dec => "#FFD700",
+        StitchTypeAbbreviation.sp => "#FFD700",
+        StitchTypeAbbreviation.st => "#FFD700",
+        StitchTypeAbbreviation.rep => "#FFD700",
+        StitchTypeAbbreviation.tog => "#FFD700",
+        StitchTypeAbbreviation.yo => "#FFD700",
+        StitchTypeAbbreviation.blo => "#FFD700",
+        StitchTypeAbbreviation.flo => "#FFD700",
+        StitchTypeAbbreviation.dtr => "#FFD700",
+        StitchTypeAbbreviation.fpdc => "#FFD700",
+        StitchTypeAbbreviation.bpsc => "#FFD700",
+        _ => throw new NotImplementedException()
+    };
+
 }

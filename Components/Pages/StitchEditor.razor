@@ -1,0 +1,80 @@
+@using InCaseIForgetMyCrochet.Models;
+@using InCaseIForgetMyCrochet.Services;
+@using System.ComponentModel.DataAnnotations;
+@inject PatternService patternService;
+
+@if (Pattern is not null)
+{
+    <InputText @bind-Value="Pattern.Name" class="form-control" />
+
+    <div class="d-flex justify-content-center">
+        <div class="input-group">
+            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 1))">-1</button>
+            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 10))">-10</button>
+            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 100))">-100</button>
+            <label class="input-group-text" for="stitchAmount">Stitch Amount</label>
+            <InputNumber id="stitchAmount" class="form-control" @bind-Value="stitchAmount" min="1" max="1000" step="1" />
+            <InputSelect id=" stitchType" @bind-Value="stitchType" class="form-select">
+                @foreach (var stitchType in Enum.GetValues<StitchTypeAbbreviation>())
+                {
+                    <option value="@stitchType">@stitchType</option>
+                }
+            </InputSelect>
+            <label class="input-group-text" for="stitchType">Stitch Type</label>
+            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 1))">+1</button>
+            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 10))">+10</button>
+            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 100))">+100</button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center">
+        @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
+        {
+            <button type="button" class="btn btn-primary"
+                @onclick="@(()=>Pattern.Rows.LastOrDefault()?.Instructions.Add(new(){ StitchType = type }))">
+                @type
+            </button>
+        }
+    </div>
+
+    <table class="border d-flex flex-column form-check h-100 w-100">
+        @foreach (var stitch in Pattern.Rows)
+        {
+            <div class="d-flex m-0 p-0">
+                <button type="button" @onclick="@(() => Pattern.Rows.Remove(stitch))">Remove Row</button>
+                <tr class="align-items-center border d-flex flex-grow-1 gap-3 justify-content-between px-5 @(selectedRow == stitch ? "btn-outline-info": "")"
+                    style="height:5rem;">
+                    @foreach (var instruction in stitch.Instructions)
+                    {
+                        <td class="d-flex" style="background-color: @(instruction.StitchType.ToPastelColor());">
+                            <button>@instruction.StitchType</button>
+                            <button class="align-content-center d-flex h-100 justify-content-center" style="float: left;"
+                                @onclick="@(() => stitch.Instructions.Remove(instruction))">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    }
+                </tr>
+            </div>
+        }
+        <button class="align-content-center d-flex h-100 justify-content-center"
+            @onclick="@(() => Pattern.Rows.Add(new Row()))">
+            Add Row
+        </button>
+    </table>
+}
+@code {
+    [Parameter] public Pattern? Pattern { get; set; }
+    Row? selectedRow { get; set; }
+    int stitchAmount { get; set; } = 1;
+    StitchTypeAbbreviation stitchType = StitchTypeAbbreviation.sc;
+}
+
+<style>
+    button {
+        display: flex;
+        place-content: center;
+        place-items: center;
+        place-self: center;
+    }
+</style>

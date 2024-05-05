@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InCaseIForgetMyCrochet.Models;
 
 public class Pattern
 {
     [Key] public int Id { get; set; }
-    [Required] public required string Name { get; set; }
+    [Required] public required string Name { get; set; } = "";
     public List<Row> Rows { get; set; } = [];
 }
 

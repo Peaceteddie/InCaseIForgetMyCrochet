@@ -15,11 +15,13 @@ public class Seed
             Rows = Enumerable.Range(0, 10).Select(i => new Row
             {
                 Instructions =
-                [
-                    new Instruction { StitchCount = 10, StitchType = StitchTypeAbbreviation.ch },
-                    new Instruction { StitchCount = 10, StitchType = StitchTypeAbbreviation.dc }
-                ]
+                Enumerable.Range(0, 10).Select(i => new Instruction
+                {
+                    StitchCount = 10,
+                    StitchType = StitchTypeAbbreviation.ch
+                }).ToList()
             }).ToList()
+
         });
         db.SaveChanges();
     }
