@@ -12,16 +12,14 @@ public class Seed
         db.Patterns.Add(new Pattern
         {
             Name = "Simple Scarf",
-            Rows = Enumerable.Range(0, 10).Select(i => new Row
+            Rows = Enumerable.Range(1, 10).Select(i => new Row
             {
-                Instructions =
-                Enumerable.Range(0, 10).Select(i => new Instruction
+                Instructions = Enumerable.Range(1, i).Select(j => new Instruction
                 {
-                    StitchCount = 10,
-                    StitchType = StitchTypeAbbreviation.ch
+                    StitchType = StitchTypeAbbreviation.ch,
+                    StitchCount = 1
                 }).ToList()
             }).ToList()
-
         });
         db.SaveChanges();
     }

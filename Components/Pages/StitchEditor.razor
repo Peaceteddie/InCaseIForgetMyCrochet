@@ -5,62 +5,115 @@
 
 @if (Pattern is not null)
 {
-    <InputText @bind-Value="Pattern.Name" class="form-control" />
+    <div class="d-flex flex-column gap-3">
+        <div class="d-flex input-group justify-content-center">
+            <label class="btn-info input-group-text" for="pattern-name">Pattern
+                Name:</label>
+            <InputText id="pattern-name" class="ps-3" @bind-Value="Pattern.Name" />
+        </div>
 
-    <div class="d-flex justify-content-center">
-        <div class="input-group">
-            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 1))">-1</button>
-            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 10))">-10</button>
-            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 100))">-100</button>
-            <label class="input-group-text" for="stitchAmount">Stitch Amount</label>
-            <InputNumber id="stitchAmount" class="form-control" @bind-Value="stitchAmount" min="1" max="1000" step="1" />
-            <InputSelect id=" stitchType" @bind-Value="stitchType" class="form-select">
-                @foreach (var stitchType in Enum.GetValues<StitchTypeAbbreviation>())
-                {
-                    <option value="@stitchType">@stitchType</option>
-                }
-            </InputSelect>
-            <label class="input-group-text" for="stitchType">Stitch Type</label>
-            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 1))">+1</button>
-            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 10))">+10</button>
-            <button type="button" @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 100))">+100</button>
+        <div class="d-flex input-group justify-content-center w-100">
+            <div class="d-flex">
+                <label class="btn-info input-group-text justify-content-end" for="stitchAmount">Stitch Amount:</label>
+                <InputNumber id="stitchAmount" class="form-control" @bind-Value="stitchAmount" min="1" max="1000"
+                    step="1" />
+                <InputSelect id="stitchType" class="form-control" @bind-Value="stitchType">
+                    @foreach (var stitchType in Enum.GetValues<StitchTypeAbbreviation>())
+                    {
+                        <option value="@stitchType">@stitchType</option>
+                    }
+                </InputSelect>
+                <label class="btn-info input-group-text justify-content-start" for="stitchType">:Stitch Type</label>
+            </div>
+        </div>
+
+        <div id="add-multiple-toolbar" class="input-group">
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 100))">-100</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 10))">-10</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 1))">-1</button>
+            <button class="btn btn-info btn-outline-dark" @onclick="@(() => stitchAmount = 1)">1</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 1))">+1</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 10))">+10</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 100))">+100</button>
+        </div>
+
+        <div id="add-single-toolbar" class="input-group">
+            @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
+            {
+                <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
+                    @onclick="@(()=>Pattern.Rows.FirstOrDefault()?.Instructions.Add(new(){ StitchType = type }))">
+                    @type
+                </button>
+            }
         </div>
     </div>
 
-    <div class="d-flex justify-content-center">
-        @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
-        {
-            <button type="button" class="btn btn-primary"
-                @onclick="@(()=>Pattern.Rows.LastOrDefault()?.Instructions.Add(new(){ StitchType = type }))">
-                @type
-            </button>
-        }
-    </div>
-
-    <table class="border d-flex flex-column form-check h-100 w-100">
-        @foreach (var stitch in Pattern.Rows)
-        {
-            <div class="d-flex m-0 p-0">
-                <button type="button" @onclick="@(() => Pattern.Rows.Remove(stitch))">Remove Row</button>
-                <tr class="align-items-center border d-flex flex-grow-1 gap-3 justify-content-between px-5 @(selectedRow == stitch ? "btn-outline-info": "")"
-                    style="height:5rem;">
-                    @foreach (var instruction in stitch.Instructions)
-                    {
-                        <td class="d-flex" style="background-color: @(instruction.StitchType.ToPastelColor());">
-                            <button>@instruction.StitchType</button>
-                            <button class="align-content-center d-flex h-100 justify-content-center" style="float: left;"
-                                @onclick="@(() => stitch.Instructions.Remove(instruction))">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    }
-                </tr>
-            </div>
-        }
-        <button class="align-content-center d-flex h-100 justify-content-center"
-            @onclick="@(() => Pattern.Rows.Add(new Row()))">
+    <div class="d-flex">
+        <button class="my-3 py-2 w-100" @onclick="@(() => {
+        if(Pattern.Rows.Count < 1) Pattern.Rows.Add(new());
+        else Pattern.Rows = Pattern.Rows.Prepend(new()).ToList();
+        })">
             Add Row
         </button>
+        <button class="my-3 py-2 w-100"
+            @onclick="@(() => { Pattern.Rows = Pattern.Rows.Count > 0 ? Pattern.Rows.OrderDescending().ToList().Concat(Pattern.Rows).ToList() : Pattern.Rows; })">
+            Mirror Pattern </button>
+    </div>
+
+    <table class=" gap-3 my-3 w-100">
+        @foreach (var stitch in Pattern.Rows)
+        {
+            <tr class="d-flex w-100">
+                <ul>
+                    <td class="col-1">
+                        <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
+                            @onclick="@(() => Pattern.Rows.Remove(stitch))">X</button>
+                    </td>
+                    <div id="@(stitch.Id)" class="d-flex w-100" style="position:relative;">
+                        @foreach (var instruction in stitch.Instructions)
+                        {
+                            <td style="position:relative;">
+                                <button class="btn-danger" style="
+                                height:2rem;
+                                width:2rem;
+                                position:absolute;
+                                bottom:50%;
+                                left:50%;" @onclick="@(() => stitch.Instructions.Remove(instruction))">
+                                    <i class="bi bi-trash" />
+                                </button>
+                                <button style="
+                                background:@(instruction.StitchType.ToPastelColor());
+                                z-index:0;">
+                                    @instruction.StitchType
+                                </button>
+                            </td>
+                        }
+                        <label for="@(stitch.Id)" class="btn-outline-light p-2 text-center text-dark" style="
+                        background: #0001;
+                        border-radius:10rem;
+                        font-size:.8rem;
+                        position:absolute;
+                        left:0%;
+                        top:10%;
+                        transform: translate(-50%, -50%);">
+                            n:@stitch.Instructions.Count
+                        </label>
+                    </div>
+                    <td class="col-1">
+                        <button class="btn btn-info text-nowrap"
+                            @onclick="@(() => stitch.Instructions.AddRange(Enumerable.Range(0, stitchAmount).Select(_ => new Instruction { StitchType = stitchType })))">
+                            @stitchAmount @stitchType
+                        </button>
+                    </td>
+                </ul>
+            </tr>
+        }
     </table>
 }
 @code {
@@ -71,10 +124,87 @@
 }
 
 <style>
-    button {
-        display: flex;
-        place-content: center;
-        place-items: center;
-        place-self: center;
+    @("@scope") {
+
+        .btn,
+        button {
+            border-radius: 10rem;
+            display: flex;
+            place-content: center;
+            place-items: center;
+            place-self: center;
+        }
+
+        input:last-child {
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+        }
+
+        label:first-child {
+            border-top-left-radius: 10rem;
+            border-bottom-left-radius: 10rem;
+        }
+
+        label:last-child {
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+        }
+
+        #add-single-toolbar {
+            display: flex;
+            flex: 1 1 auto;
+
+            & * {
+                display: flex;
+                flex: 1 1 auto;
+            }
+        }
+
+        #add-multiple-toolbar {
+            display: flex;
+            flex: 1 1 auto;
+
+            & * {
+                display: flex;
+                flex: 1 1 auto;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        table {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+        }
+
+        tr {
+            border-bottom: 1px solid black;
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: row;
+        }
+
+        ul {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: row;
+            margin: 0;
+            padding: 0;
+        }
+
+        td {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            margin: auto !important;
+
+            & button {
+                padding: .3rem .6rem;
+            }
+        }
     }
 </style>
