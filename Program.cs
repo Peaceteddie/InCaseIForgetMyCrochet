@@ -2,9 +2,6 @@ using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Components;
 using InCaseIForgetMyCrochet.Services;
 
-Environment.SetEnvironmentVariable("ICIFMC_BasePath", Directory.GetCurrentDirectory());
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
