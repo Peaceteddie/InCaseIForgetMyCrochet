@@ -44,7 +44,7 @@
             @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
             {
                 <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
-                    @onclick="@(()=>Pattern.Rows.FirstOrDefault()?.Instructions.Add(new(){ StitchType = type }))">
+                    @onclick="@(()=>{Pattern.Rows.FirstOrDefault()?.Instructions.Add(new(){ StitchType = type }); Refresh.InvokeAsync();})">
                     @type
                 </button>
             }
@@ -54,10 +54,8 @@
 
 @code {
     [Parameter] public Pattern? Pattern { get; set; }
+    [Parameter] public EventCallback Refresh { get; set; }
 
-    Row? selectedRow { get; set; }
     int stitchAmount { get; set; } = 1;
     StitchTypeAbbreviation stitchType = StitchTypeAbbreviation.sc;
-
-    protected override void OnInitialized() => Pattern ??= new();
 }

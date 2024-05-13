@@ -1,6 +1,5 @@
 using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Components;
-using InCaseIForgetMyCrochet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +9,6 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddDbContext<PatternDbContext>();
 
-builder.Services.AddScoped<PatternService>();
 
 var app = builder.Build();
 

@@ -2,12 +2,10 @@
 @using InCaseIForgetMyCrochet
 @using InCaseIForgetMyCrochet.Components.StitchEditor
 @using InCaseIForgetMyCrochet.Models
-@using InCaseIForgetMyCrochet.Services
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.Web
-@inject PatternService patternService
+@inject PatternDbContext context
 
-@implements IDisposable
 @rendermode InteractiveServer
 
 <div class="container d-flex flex-column gap-5">
@@ -18,23 +16,23 @@
             {
                 @foreach (var pattern in patterns)
                 {
-                    <li class="list-group-item" style="width:15vw;">
-                        <button class="btn btn-primary w-100" @onclick="@(() => {this.pattern = pattern; StateHasChanged();})">
-                            <h4>@pattern.Name</h4>
-                        </button>
-                    </li>
+                            <li class="list-group-item" style="width:15vw;">
+                                <button class="btn btn-primary w-100" @onclick="@(() => {this.pattern = pattern; StateHasChanged();})">
+                                    <h4>@pattern.Name</h4>
+                                </button>
+                            </li>
                 }
-                <button class="btn btn-primary w-100"
-                    @onclick="@(() => {this.pattern = new Pattern { Name = "" }; StateHasChanged();})">
-                    <h4>New Pattern</h4>
-                </button>
+                    <button class="btn btn-primary w-100"
+                        @onclick="@(() => {this.pattern = new Pattern { Name = "" }; StateHasChanged();})">
+                        <h4>New Pattern</h4>
+                    </button>
             }
         </ul>
         @if (pattern != null)
         {
-            <EditForm class="container h-100" Model="@pattern" OnFieldChanged="HandleFieldChanged">
-                <StitchEditor Pattern="@pattern" />
-            </EditForm>
+                <EditForm class="container h-100" Model="@pattern" EditContext.OnFieldChanged="HandleFieldChanged">
+                    <StitchEditor Pattern="@pattern" />
+                </EditForm>
         }
     </div>
 </div>
@@ -42,29 +40,18 @@
     Pattern? pattern { get; set; } = null;
     List<Pattern>? patterns { get; set; }
     int amountStitches { get; set; } = 1;
-    Timer? saveTimer;
 
     protected override async Task OnInitializedAsync()
     {
-        patterns = await patternService.GetPatternsAsync();
-
-        saveTimer = new Timer(async _ =>
-        {
-            if (pattern is not null)
-                await patternService.SaveChangesAsync();
-        }, null, 0, 5000);
+        patterns = await context.Patterns.Include(p=>p.Rows).ThenInclude(r => r.Instructions).ToListAsync();
     }
 
     private void HandleFieldChanged(FieldChangedEventArgs e)
     {
         if (pattern is not null)
-            patternService.HandleFieldChanged(pattern);
-    }
-
-    public void Dispose()
-    {
-        saveTimer?.Dispose();
-        using var context = new PatternDbContext();
-        context.SaveChanges();
+        {
+            context.Update(pattern);
+            context.SaveChanges();
+        }
     }
 }
