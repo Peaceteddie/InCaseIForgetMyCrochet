@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using InCaseIForgetMyCrochet
+@using InCaseIForgetMyCrochet.Components.StitchEditor
 @using InCaseIForgetMyCrochet.Models
 @using InCaseIForgetMyCrochet.Services
 @using Microsoft.EntityFrameworkCore
@@ -45,7 +46,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-    @inject PatternService patternService
         patterns = await patternService.GetPatternsAsync();
 
         saveTimer = new Timer(async _ =>

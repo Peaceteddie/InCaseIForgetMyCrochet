@@ -1,0 +1,64 @@
+@using InCaseIForgetMyCrochet.Models;
+@if (Pattern is not null)
+{
+    <table class=" gap-3 my-3 w-100">
+        @foreach (var stitch in Pattern.Rows)
+        {
+            <tr class="d-flex w-100">
+                <ul>
+                    <td class="col-1">
+                        <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
+                            @onclick="@(() => Pattern.Rows.Remove(stitch))">X</button>
+                    </td>
+                    <div id="@(stitch.Id)" class="d-flex w-100" style="position:relative;">
+                        @foreach (var instruction in stitch.Instructions)
+                        {
+                            <td style="position:relative;">
+                                <button class="btn-danger" style="
+                                height:2rem;
+                                width:2rem;
+                                position:absolute;
+                                bottom:50%;
+                                left:50%;" @onclick="@(() => stitch.Instructions.Remove(instruction))">
+                                    <i class="bi bi-trash" />
+                                </button>
+                                <button style="
+                                background:@(instruction.StitchType.ToPastelColor());
+                                z-index:0;">
+                                    @instruction.StitchType
+                                </button>
+                            </td>
+                        }
+                        <label for="@(stitch.Id)" class="btn-outline-light p-2 text-center text-dark" style="
+                        background: #0001;
+                        border-radius:10rem;
+                        font-size:.8rem;
+                        position:absolute;
+                        left:0%;
+                        top:10%;
+                        transform: translate(-50%, -50%);">
+                            n:@stitch.Instructions.Count
+                        </label>
+                    </div>
+                    <td class="col-1">
+                        <button class="btn btn-info text-nowrap"
+                            @onclick="@(() => stitch.Instructions.AddRange(Enumerable.Range(0, stitchAmount).Select(_ => new Instruction { StitchType = stitchType })))">
+                            @stitchAmount @stitchType
+                        </button>
+                    </td>
+                </ul>
+            </tr>
+        }
+    </table>
+}
+
+@code {
+    [Parameter]
+    public Pattern? Pattern { get; set; }
+
+    [Parameter]
+    public int stitchAmount { get; set; } = 1;
+
+    [Parameter]
+    public StitchTypeAbbreviation stitchType { get; set; } = StitchTypeAbbreviation.sc;
+}

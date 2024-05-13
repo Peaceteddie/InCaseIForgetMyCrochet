@@ -1,0 +1,115 @@
+@using InCaseIForgetMyCrochet.Models;
+@using InCaseIForgetMyCrochet.Services;
+@using System.ComponentModel.DataAnnotations;
+@inject PatternService patternService;
+
+@if (Pattern is not null)
+{
+    <StitchToolbar Pattern="@Pattern" />
+
+    <div class="d-flex">
+        <button class="my-3 py-2 w-100" @onclick="@(() => {
+        if(Pattern.Rows.Count < 1) Pattern.Rows.Add(new());
+        else Pattern.Rows = Pattern.Rows.Prepend(new()).ToList();
+        })">
+            Add Row
+        </button>
+        <button class="my-3 py-2 w-100"
+            @onclick="@(() => { Pattern.Rows = Pattern.Rows.Count > 0 ? Pattern.Rows.OrderByDescending(x => Pattern.Rows.IndexOf(x)).ToList().Concat(Pattern.Rows).ToList() : Pattern.Rows; })">
+            Mirror Pattern </button>
+    </div>
+
+    <StitchViewer Pattern="@Pattern" />
+}
+@code {
+    [Parameter] public Pattern? Pattern { get; set; }
+    Row? selectedRow { get; set; }
+    int stitchAmount { get; set; } = 1;
+    StitchTypeAbbreviation stitchType = StitchTypeAbbreviation.sc;
+}
+
+<style>
+    @("@scope") {
+
+        .btn,
+        button {
+            border-radius: 10rem;
+            display: flex;
+            place-content: center;
+            place-items: center;
+            place-self: center;
+        }
+
+        input:last-child {
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+        }
+
+        label:first-child {
+            border-top-left-radius: 10rem;
+            border-bottom-left-radius: 10rem;
+        }
+
+        label:last-child {
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+        }
+
+        #add-single-toolbar {
+            display: flex;
+            flex: 1 1 auto;
+
+            & * {
+                display: flex;
+                flex: 1 1 auto;
+            }
+        }
+
+        #add-multiple-toolbar {
+            display: flex;
+            flex: 1 1 auto;
+
+            & * {
+                display: flex;
+                flex: 1 1 auto;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        table {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+        }
+
+        tr {
+            border-bottom: 1px solid black;
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: row;
+        }
+
+        ul {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: row;
+            margin: 0;
+            padding: 0;
+        }
+
+        td {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            margin: auto !important;
+
+            & button {
+                padding: .3rem .6rem;
+            }
+        }
+    }
+</style>

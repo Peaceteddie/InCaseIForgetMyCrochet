@@ -1,0 +1,64 @@
+using InCaseIForgetMyCrochet.Models;
+@using InCaseIForgetMyCrochet.Models;
+@using Microsoft.EntityFrameworkCore;
+@if (Pattern is not null)
+{
+    <div class="d-flex flex-column gap-3">
+        <div class="d-flex input-group justify-content-center">
+            <label class="btn-info input-group-text" for="pattern-name">Pattern
+                Name:</label>
+            <InputText id="pattern-name" class="ps-3" @bind-Value="Pattern.Name" />
+        </div>
+
+        <div class="d-flex input-group justify-content-center w-100">
+            <div class="d-flex">
+                <label class="btn-info input-group-text justify-content-end" for="stitchAmount">Stitch Amount:</label>
+                <InputNumber id="stitchAmount" class="form-control" @bind-Value="stitchAmount" min="1" max="1000"
+                    step="1" />
+                <InputSelect id="stitchType" class="form-control" @bind-Value="stitchType">
+                    @foreach (var stitchType in Enum.GetValues<StitchTypeAbbreviation>())
+                    {
+                        <option value="@stitchType">@stitchType</option>
+                    }
+                </InputSelect>
+                <label class="btn-info input-group-text justify-content-start" for="stitchType">:Stitch Type</label>
+            </div>
+        </div>
+
+        <div id="add-multiple-toolbar" class="input-group">
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 100))">-100</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 10))">-10</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 1))">-1</button>
+            <button class="btn btn-info btn-outline-dark" @onclick="@(() => stitchAmount = 1)">1</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 1))">+1</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 10))">+10</button>
+            <button class="btn btn-info btn-outline-dark" type="button"
+                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 100))">+100</button>
+        </div>
+
+        <div id="add-single-toolbar" class="input-group">
+            @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
+            {
+                <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
+                    @onclick="@(()=>Pattern.Rows.FirstOrDefault()?.Instructions.Add(new(){ StitchType = type }))">
+                    @type
+                </button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Pattern? Pattern { get; set; }
+
+    Row? selectedRow { get; set; }
+    int stitchAmount { get; set; } = 1;
+    StitchTypeAbbreviation stitchType = StitchTypeAbbreviation.sc;
+
+    protected override void OnInitialized() => Pattern ??= new();
+}
