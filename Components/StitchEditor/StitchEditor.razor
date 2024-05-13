@@ -5,21 +5,21 @@
 
 @if (Pattern is not null)
 {
-    <StitchToolbar Pattern="@Pattern" />
+        <StitchToolbar Pattern="@Pattern" />
 
-    <div class="d-flex">
-        <button class="my-3 py-2 w-100" @onclick="@(() => {
+        <div class="d-flex">
+            <button class="my-3 py-2 w-100" @onclick="@(() => {
         if(Pattern.Rows.Count < 1) Pattern.Rows.Add(new());
         else Pattern.Rows = Pattern.Rows.Prepend(new()).ToList();
         })">
-            Add Row
-        </button>
-        <button class="my-3 py-2 w-100"
-            @onclick="@(() => { Pattern.Rows = Pattern.Rows.Count > 0 ? Pattern.Rows.OrderByDescending(x => Pattern.Rows.IndexOf(x)).ToList().Concat(Pattern.Rows).ToList() : Pattern.Rows; })">
-            Mirror Pattern </button>
-    </div>
+                Add Row
+            </button>
+            <button class="my-3 py-2 w-100"
+                @onclick="@(() => { Pattern.Rows = Pattern.Rows.Count > 0 ? Pattern.Rows.OrderByDescending(x => Pattern.Rows.IndexOf(x)).ToList().Concat(Pattern.Rows).ToList() : Pattern.Rows; })">
+                Mirror Pattern </button>
+        </div>
 
-    <StitchViewer Pattern="@Pattern" />
+        <StitchViewer Pattern="@Pattern" />
 }
 @code {
     [Parameter] public Pattern? Pattern { get; set; }
