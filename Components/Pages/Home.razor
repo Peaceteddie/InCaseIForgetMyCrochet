@@ -32,7 +32,8 @@
         @if (Pattern != null)
         {
             <EditForm id="stitch-editor" class="container h-100" Model="@Pattern">
-                <StitchToolbar Pattern="@Pattern" Refresh="@StateHasChanged" />
+                <StitchToolbar Pattern="@Pattern" StitchAmountChanged="@(i => StitchAmountChanged(i))"
+                    StitchTypeChanged="@(t => StitchTypeChanged(t))" Refresh="StateHasChanged" />
                 <div class="d-flex">
                     <button class="my-3 py-2 w-100" @onclick="AddRow">
                         Add Row
@@ -46,7 +47,7 @@
                         </button>
                     </div>
                 </div>
-                <StitchViewer Pattern="@Pattern" />
+                <StitchViewer Pattern="@Pattern" StitchAmount="stitchAmount" StitchType="stitchType" />
             </EditForm>
         }
     </div>
@@ -55,6 +56,9 @@
 @code {
     Pattern? Pattern { get; set; }
     List<Pattern>? Patterns { get; set; }
+
+    int stitchAmount { get; set; } = 1;
+    StitchTypeAbbreviation stitchType { get; set; } = StitchTypeAbbreviation.sc;
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,13 +69,26 @@
         .ToListAsync();
     }
 
+    private void StitchAmountChanged(int amount)
+    => stitchAmount = amount;
+    private void StitchTypeChanged(StitchTypeAbbreviation type)
+    => stitchType = type;
+
     private async Task AddRow()
     {
         if (Pattern is null) return;
-
-        if (Pattern.Rows.Count < 1) Pattern.Rows.Add(new());
-        else Pattern.Rows = Pattern.Rows.Prepend(new()).ToList();
-
+        if (Pattern.Rows is null)
+        {
+            Pattern.Rows = new List<Row>();
+        }
+        if (Pattern.Rows.Count == 0)
+        {
+            Pattern.Rows.Add(new Row());
+        }
+        else
+        {
+            Pattern.Rows = [new Row(), .. Pattern.Rows.Select(r => r.Clone())];
+        }
         await SaveChangesAsync();
     }
 

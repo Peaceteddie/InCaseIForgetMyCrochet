@@ -1,4 +1,6 @@
 @using InCaseIForgetMyCrochet.Models;
+
+
 @if (Pattern is not null)
 {
     <table class=" gap-3 my-3 w-100">
@@ -42,23 +44,12 @@
                     </div>
                     <td class="col-1">
                         <button class="btn btn-info text-nowrap"
-                            @onclick="@(() => stitch.Instructions.AddRange(Enumerable.Range(0, stitchAmount).Select(_ => new Instruction { StitchType = stitchType })))">
-                            @stitchAmount @stitchType
+                            @onclick="@(() => stitch.Instructions.AddRange(Enumerable.Range(0, StitchAmount).Select(_ => new Instruction { StitchType = StitchType })))">
+                            @StitchAmount @StitchType
                         </button>
                     </td>
                 </ul>
             </tr>
         }
     </table>
-}
-
-@code {
-    [Parameter]
-    public Pattern? Pattern { get; set; }
-
-    [Parameter]
-    public int stitchAmount { get; set; } = 1;
-
-    [Parameter]
-    public StitchTypeAbbreviation stitchType { get; set; } = StitchTypeAbbreviation.sc;
 }

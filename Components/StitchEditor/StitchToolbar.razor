@@ -11,33 +11,33 @@
 
         <div class="d-flex input-group justify-content-center w-100">
             <div class="d-flex">
-                <label class="btn-info input-group-text justify-content-end" for="stitchAmount">Stitch Amount:</label>
-                <InputNumber id="stitchAmount" class="form-control" @bind-Value="stitchAmount" min="1" max="1000"
+                <label class="btn-info input-group-text justify-content-end" for="StitchAmount">Stitch Amount:</label>
+                <InputNumber id="StitchAmount" class="form-control" @bind-Value="StitchAmount" min="1" max="1000"
                     step="1" />
-                <InputSelect id="stitchType" class="form-control" @bind-Value="stitchType">
-                    @foreach (var stitchType in Enum.GetValues<StitchTypeAbbreviation>())
+                <InputSelect id="StitchType" class="form-control" @bind-Value="StitchType">
+                    @foreach (var StitchType in Enum.GetValues<StitchTypeAbbreviation>())
                     {
-                        <option value="@stitchType">@stitchType</option>
+                        <option value="@StitchType">@StitchType</option>
                     }
                 </InputSelect>
-                <label class="btn-info input-group-text justify-content-start" for="stitchType">:Stitch Type</label>
+                <label class="btn-info input-group-text justify-content-start" for="StitchType">:Stitch Type</label>
             </div>
         </div>
 
         <div id="add-multiple-toolbar" class="input-group">
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 100))">-100</button>
+                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount - 100))">-100</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 10))">-10</button>
+                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount - 10))">-10</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount - 1))">-1</button>
-            <button class="btn btn-info btn-outline-dark" @onclick="@(() => stitchAmount = 1)">1</button>
+                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount - 1))">-1</button>
+            <button class="btn btn-info btn-outline-dark" @onclick="@(() => StitchAmount = 1)">1</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 1))">+1</button>
+                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount + 1))">+1</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 10))">+10</button>
+                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount + 10))">+10</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => stitchAmount = Math.Max(1, stitchAmount + 100))">+100</button>
+                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount + 100))">+100</button>
         </div>
 
         <div id="add-single-toolbar" class="input-group">
@@ -50,12 +50,4 @@
             }
         </div>
     </div>
-}
-
-@code {
-    [Parameter] public Pattern? Pattern { get; set; }
-    [Parameter] public EventCallback Refresh { get; set; }
-
-    int stitchAmount { get; set; } = 1;
-    StitchTypeAbbreviation stitchType = StitchTypeAbbreviation.sc;
 }
