@@ -4,7 +4,7 @@
 @using InCaseIForgetMyCrochet.Models
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.Web
-@inject PatternDbContext context
+@inject PatternDbContext Context
 
 @rendermode InteractiveServer
 
@@ -12,46 +12,204 @@
     <h1>Home</h1>
     <div class="d-flex gap-5">
         <ul class="list-group">
-            @if (patterns != null)
+            @if (Patterns != null)
             {
-                @foreach (var pattern in patterns)
+                @foreach (var pattern in Patterns)
                 {
-                            <li class="list-group-item" style="width:15vw;">
-                                <button class="btn btn-primary w-100" @onclick="@(() => {this.pattern = pattern; StateHasChanged();})">
-                                    <h4>@pattern.Name</h4>
-                                </button>
-                            </li>
+                    <li class="list-group-item" style="width:15vw;">
+                        <button class="btn btn-primary w-100"
+                            @onclick="@((Action)(() => {this.Pattern = pattern; StateHasChanged();}))">
+                            <h4>@pattern.Name</h4>
+                        </button>
+                    </li>
                 }
-                    <button class="btn btn-primary w-100"
-                        @onclick="@(() => {this.pattern = new Pattern { Name = "" }; StateHasChanged();})">
-                        <h4>New Pattern</h4>
-                    </button>
+                <button class="btn btn-primary w-100"
+                    @onclick="@((Action)(() => {this.Pattern = new Pattern { Name = "" }; StateHasChanged();}))">
+                    <h4>New Pattern</h4>
+                </button>
             }
         </ul>
-        @if (pattern != null)
+        @if (Pattern != null)
         {
-                <EditForm class="container h-100" Model="@pattern" EditContext.OnFieldChanged="HandleFieldChanged">
-                    <StitchEditor Pattern="@pattern" />
-                </EditForm>
+            <EditForm id="stitch-editor" class="container h-100" Model="@Pattern">
+                <StitchToolbar Pattern="@Pattern" Refresh="@StateHasChanged" />
+                <div class="d-flex">
+                    <button class="my-3 py-2 w-100" @onclick="AddRow">
+                        Add Row
+                    </button>
+                    <div>
+                        <button class="my-3 py-2 w-100" @onclick="MirrorPatternUp">
+                            Mirror Pattern Up ⬆️
+                        </button>
+                        <button class="my-3 py-2 w-100" @onclick="MirrorPatternDown">
+                            Mirror Pattern Down ⬇️
+                        </button>
+                    </div>
+                </div>
+                <StitchViewer Pattern="@Pattern" />
+            </EditForm>
         }
     </div>
 </div>
+
 @code {
-    Pattern? pattern { get; set; } = null;
-    List<Pattern>? patterns { get; set; }
-    int amountStitches { get; set; } = 1;
+    Pattern? Pattern { get; set; }
+    List<Pattern>? Patterns { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        patterns = await context.Patterns.Include(p=>p.Rows).ThenInclude(r => r.Instructions).ToListAsync();
+        Patterns = await Context.Patterns
+        .AsTracking()
+        .Include(p => p.Rows)
+        .ThenInclude(r => r.Instructions)
+        .ToListAsync();
     }
 
-    private void HandleFieldChanged(FieldChangedEventArgs e)
+    private async Task AddRow()
     {
-        if (pattern is not null)
+        if (Pattern is null) return;
+
+        if (Pattern.Rows.Count < 1) Pattern.Rows.Add(new());
+        else Pattern.Rows = Pattern.Rows.Prepend(new()).ToList();
+
+        await SaveChangesAsync();
+    }
+
+    private async Task MirrorPatternUp()
+    {
+        if (Pattern is null) return;
+
+        var normalRows = Pattern.Rows
+        .Select(r => r.Clone())
+        .ToList();
+
+        var reversedRows = Pattern.Rows
+        .Select(r => r.Clone())
+        .Reverse()
+        .ToList();
+        var newRows = new List<Row>();
+        newRows.AddRange(reversedRows);
+        newRows.AddRange(normalRows);
+
+        Pattern.Rows = newRows;
+
+        await SaveChangesAsync();
+    }
+
+    private async Task MirrorPatternDown()
+    {
+        if (Pattern is null) return;
+
+        var reversedRows = Pattern.Rows
+        .Select(r => r.Clone())
+        .Reverse()
+        .ToList();
+
+        Pattern.Rows.AddRange(reversedRows);
+
+        await SaveChangesAsync();
+    }
+
+    private async Task SaveChangesAsync()
+    {
+        if (Pattern is null || Pattern.Rows is null) return;
+
+        try
         {
-            context.Update(pattern);
-            context.SaveChanges();
+            Context.Update(Pattern);
+            await Context.Entry(Pattern).ReloadAsync();
+            await Context.SaveChangesAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception while saving changes: {ex.Message}");
         }
     }
 }
+
+<style>
+    form {
+
+        .btn,
+        button {
+            border-radius: 10rem;
+            display: flex;
+            place-content: center;
+            place-items: center;
+            place-self: center;
+        }
+
+        input:last-child {
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+        }
+
+        label:first-child {
+            border-top-left-radius: 10rem;
+            border-bottom-left-radius: 10rem;
+        }
+
+        label:last-child {
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+        }
+
+        #add-single-toolbar {
+            display: flex;
+            flex: 1 1 auto;
+
+            & * {
+                display: flex;
+                flex: 1 1 auto;
+            }
+        }
+
+        #add-multiple-toolbar {
+            display: flex;
+            flex: 1 1 auto;
+
+            & * {
+                display: flex;
+                flex: 1 1 auto;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        table {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+        }
+
+        tr {
+            border-bottom: 1px solid black;
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: row;
+        }
+
+        ul {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: row;
+            margin: 0;
+            padding: 0;
+        }
+
+        td {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            margin: auto !important;
+
+            & button {
+                padding: 0.3rem 0.6rem;
+            }
+        }
+    }
+</style>

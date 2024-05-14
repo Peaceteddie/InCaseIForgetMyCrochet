@@ -1,6 +1,5 @@
 using System.Text.Json;
-
-namespace InCaseIForgetMyCrochet;
+using InCaseIForgetMyCrochet.Models;
 
 public static class Extensions
 {
@@ -17,5 +16,10 @@ public static class Extensions
         Console.Write($"{label}: ");
         Console.WriteLine(JsonSerializer.Serialize(obj, options));
         return obj;
+    }
+    public static List<Row> MirrorPattern(this List<Row> rows)
+    {
+        rows.AddRange([.. rows.OrderByDescending(x => x.Id)]);
+        return rows;
     }
 }
