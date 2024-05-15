@@ -6,15 +6,15 @@
         <div class="d-flex input-group justify-content-center">
             <label class="btn-info input-group-text" for="pattern-name">Pattern
                 Name:</label>
-            <InputText id="pattern-name" class="ps-3" @bind-Value="Pattern.Name" />
+            <InputText id="pattern-name" class="ps-3" @bind-Value="Pattern.Name"
+                @bind-Value:after="@(async () => await SaveAndRefresh())" />
         </div>
 
         <div class="d-flex input-group justify-content-center w-100">
             <div class="d-flex">
                 <label class="btn-info input-group-text justify-content-end" for="StitchAmount">Stitch Amount:</label>
-                <InputNumber id="StitchAmount" class="form-control" @bind-Value="StitchAmount" min="1" max="1000"
-                    step="1" />
-                <InputSelect id="StitchType" class="form-control" @bind-Value="StitchType">
+                <InputNumber id="StitchAmount" class="form-control" @bind-Value="StitchAmount" @bind-Value:after="@(async () => await Refresh.InvokeAsync((StitchAmount,null)))" min="1" max="1000" step="1" />
+                <InputSelect id="StitchType" class="form-control" @bind-Value="StitchType" @bind-Value:after="@(async () => await Refresh.InvokeAsync((null,StitchType)))">
                     @foreach (var StitchType in Enum.GetValues<StitchTypeAbbreviation>())
                     {
                         <option value="@StitchType">@StitchType</option>
@@ -24,36 +24,36 @@
             </div>
         </div>
 
-        @* Bugs on invalid validation *@
         <div id="add-multiple-toolbar" class="input-group">
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount - 100))">-100</button>
+                @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount - 100);await Refresh.InvokeAsync((StitchAmount,null));})">-100</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount - 10))">-10</button>
+                @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount - 10);await Refresh.InvokeAsync((StitchAmount,null));})">-10</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount - 1))">-1</button>
-            <button class="btn btn-info btn-outline-dark" @onclick="@(() => StitchAmount = 1)">1</button>
+                @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount - 1);await Refresh.InvokeAsync((StitchAmount,null));})">-1</button>
+            <button class="btn btn-info btn-outline-dark"
+                @onclick="@(async() => {StitchAmount = 1;await Refresh.InvokeAsync((StitchAmount,null));})">1</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount + 1))">+1</button>
+                @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount + 1);await Refresh.InvokeAsync((StitchAmount,null));})">+1</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount + 10))">+10</button>
+                @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount + 10);await Refresh.InvokeAsync((StitchAmount,null));})">+10</button>
             <button class="btn btn-info btn-outline-dark" type="button"
-                @onclick="@(() => StitchAmount = Math.Max(1, StitchAmount + 100))">+100</button>
+                @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount + 100);await Refresh.InvokeAsync((StitchAmount,null));})">+100</button>
         </div>
 
-        <div id="add-single-toolbar" class="input-group">
-            @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
-            {
-                <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
-                    data-bs-toggle="tooltip" title="@type.ToStitchType()"
-                    @onclick="@(()=>{Pattern.Rows.FirstOrDefault()?.Instructions.Add(new(){ StitchType = type }); Refresh.InvokeAsync();})">
-                    @type
-                </button>
-            }
+            <div id="add-single-toolbar" class="input-group">
+                @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
+{
+            <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
+                data-bs-toggle="tooltip" title="@type.ToStitchType()"
+                @onclick="@(async () => await AddStitch(type))">
+                @type
+            </button>
+}
         </div>
     </div>
     <script>
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
     </script>
-}
+    }

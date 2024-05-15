@@ -6,28 +6,26 @@ namespace InCaseIForgetMyCrochet.Components.StitchEditor;
 public partial class StitchToolbar
 {
     [Parameter] public Pattern? Pattern { get; set; }
-    [Parameter] public EventCallback Refresh { get; set; }
-    [Parameter] public EventCallback<int> StitchAmountChanged { get; set; }
-    [Parameter] public EventCallback<StitchTypeAbbreviation> StitchTypeChanged { get; set; }
+    [Parameter] public EventCallback<(int?, StitchTypeAbbreviation?)> Refresh { get; set; }
+    [Parameter] public int StitchAmount { get; set; }
+    [Parameter] public StitchTypeAbbreviation StitchType { get; set; }
+    PatternDbContext Context { get; set; } = new PatternDbContext();
 
-    int _StitchAmount = 1;
-    int StitchAmount
+    async Task AddStitch(StitchTypeAbbreviation type)
     {
-        get => _StitchAmount;
-        set
-        {
-            _StitchAmount = value;
-            StitchAmountChanged.InvokeAsync(value);
-        }
+        if (Pattern is null) return;
+
+        Pattern.Rows
+        .FirstOrDefault()?
+        .Instructions
+        .Add(new Instruction { StitchType = type });
+
+        await SaveAndRefresh();
     }
-    StitchTypeAbbreviation _StitchType;
-    StitchTypeAbbreviation StitchType
+    async Task SaveAndRefresh()
     {
-        get => _StitchType;
-        set
-        {
-            _StitchType = value;
-            StitchTypeChanged.InvokeAsync(value);
-        }
+        if (Pattern is null) return;
+        await Pattern.SaveChangesAsync(Context);
+        await Refresh.InvokeAsync();
     }
 }

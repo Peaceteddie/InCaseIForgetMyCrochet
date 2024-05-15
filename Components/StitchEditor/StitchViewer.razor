@@ -10,7 +10,7 @@
                 <ul>
                     <td class="col-1">
                         <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
-                            @onclick="@(() => Pattern.Rows.Remove(stitch))">X</button>
+                            @onclick="@(async () => {Pattern.Rows.Remove(stitch); await Pattern.SaveChangesAsync(Context);})">X</button>
                     </td>
                     <div id="@(stitch.Id)" class="d-flex w-100" style="position:relative;">
                         @foreach (var instruction in stitch.Instructions)
@@ -21,14 +21,21 @@
                                 width:2rem;
                                 position:absolute;
                                 bottom:50%;
-                                left:50%;" @onclick="@(() => stitch.Instructions.Remove(instruction))">
+                                left:50%;"
+                                    @onclick="@(async() => {stitch.Instructions.Remove(instruction); await Pattern.SaveChangesAsync(Context);})">
                                     <i class="bi bi-trash" />
                                 </button>
-                                <button style="
+                                <span class="d-flex rounded-pill" style="
                                 background:@(instruction.StitchType.ToPastelColor());
+                                cursor:default;
+                                height:2.5rem;
+                                place-content:center;
+                                place-items:center;
+                                place-self:center;
+                                width:2.5rem;
                                 z-index:0;">
                                     @instruction.StitchType
-                                </button>
+                                </span>
                             </td>
                         }
                         <label for="@(stitch.Id)" class="btn-outline-light p-2 text-center text-dark" style="
@@ -44,7 +51,7 @@
                     </div>
                     <td class="col-1">
                         <button class="btn btn-info text-nowrap"
-                            @onclick="@(() => stitch.Instructions.AddRange(Enumerable.Range(0, StitchAmount).Select(_ => new Instruction { StitchType = StitchType })))">
+                            @onclick="@(async() => {stitch.Instructions.AddRange(Enumerable.Range(0, StitchAmount).Select(_ => new Instruction { StitchType = StitchType })); await Pattern.SaveChangesAsync(Context);})">
                             @StitchAmount @StitchType
                         </button>
                     </td>

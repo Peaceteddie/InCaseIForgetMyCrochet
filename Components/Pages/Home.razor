@@ -6,6 +6,8 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject PatternDbContext Context
 
+@using ToolbarParams = (int? amount, InCaseIForgetMyCrochet.Models.StitchTypeAbbreviation? type);
+
 @rendermode InteractiveServer
 
 <div class="container d-flex flex-column gap-5">
@@ -17,14 +19,12 @@
                 @foreach (var pattern in Patterns)
                 {
                     <li class="list-group-item" style="width:15vw;">
-                        <button class="btn btn-primary w-100"
-                            @onclick="@((Action)(() => {this.Pattern = pattern; StateHasChanged();}))">
+                        <button class="btn btn-primary w-100" @onclick="@(() => SelectPattern(pattern))">
                             <h4>@pattern.Name</h4>
                         </button>
                     </li>
                 }
-                <button class="btn btn-primary w-100"
-                    @onclick="@((Action)(() => {this.Pattern = new Pattern { Name = "" }; StateHasChanged();}))">
+                <button class="btn btn-primary w-100" @onclick="NewPattern">
                     <h4>New Pattern</h4>
                 </button>
             }
@@ -32,8 +32,9 @@
         @if (Pattern != null)
         {
             <EditForm id="stitch-editor" class="container h-100" Model="@Pattern">
-                <StitchToolbar Pattern="@Pattern" StitchAmountChanged="@(i => StitchAmountChanged(i))"
-                    StitchTypeChanged="@(t => StitchTypeChanged(t))" Refresh="StateHasChanged" />
+                <StitchToolbar Pattern="@Pattern"
+                    Refresh="@((ToolbarParams Params) => Refresh((Params.amount,Params.type)))" StitchAmount="@stitchAmount"
+                    StitchType="@stitchType" />
                 <div class="d-flex">
                     <button class="my-3 py-2 w-100" @onclick="AddRow">
                         Add Row
@@ -47,7 +48,7 @@
                         </button>
                     </div>
                 </div>
-                <StitchViewer Pattern="@Pattern" StitchAmount="stitchAmount" StitchType="stitchType" />
+                <StitchViewer Pattern="@Pattern" Refresh="Refresh" StitchAmount="@stitchAmount" StitchType="@stitchType" />
             </EditForm>
         }
     </div>
@@ -56,9 +57,8 @@
 @code {
     Pattern? Pattern { get; set; }
     List<Pattern>? Patterns { get; set; }
-
     int stitchAmount { get; set; } = 1;
-    StitchTypeAbbreviation stitchType { get; set; } = StitchTypeAbbreviation.sc;
+    StitchTypeAbbreviation stitchType { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,10 +69,30 @@
         .ToListAsync();
     }
 
-    private void StitchAmountChanged(int amount)
-    => stitchAmount = amount;
-    private void StitchTypeChanged(StitchTypeAbbreviation type)
-    => stitchType = type;
+    private void NewPattern()
+    {
+        Pattern = new Pattern();
+    }
+    private void Refresh()
+    => Refresh(new());
+    private void Refresh(ToolbarParams Params)
+    {
+        var (stitchAmount, stitchType) = Params;
+
+        if (stitchAmount.HasValue)
+        {
+            this.stitchAmount = stitchAmount.Value;
+        }
+        if (stitchType.HasValue)
+        {
+            this.stitchType = stitchType.Value;
+        }
+        StateHasChanged();
+    }
+    private void SelectPattern(Pattern pattern)
+    {
+        Pattern = pattern;
+    }
 
     private async Task AddRow()
     {
@@ -89,9 +109,8 @@
         {
             Pattern.Rows = [new Row(), .. Pattern.Rows.Select(r => r.Clone())];
         }
-        await SaveChangesAsync();
+        await Pattern.SaveChangesAsync(Context);
     }
-
     private async Task MirrorPatternUp()
     {
         if (Pattern is null) return;
@@ -110,9 +129,8 @@
 
         Pattern.Rows = newRows;
 
-        await SaveChangesAsync();
+        await Pattern.SaveChangesAsync(Context);
     }
-
     private async Task MirrorPatternDown()
     {
         if (Pattern is null) return;
@@ -124,24 +142,7 @@
 
         Pattern.Rows.AddRange(reversedRows);
 
-        await SaveChangesAsync();
-    }
-
-    private async Task SaveChangesAsync()
-    {
-        if (Pattern is null || Pattern.Rows is null) return;
-
-        try
-        {
-            Context.Update(Pattern);
-            await Context.Entry(Pattern).ReloadAsync();
-            await Context.SaveChangesAsync();
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception while saving changes: {ex.Message}");
-        }
+        await Pattern.SaveChangesAsync(Context);
     }
 }
 
