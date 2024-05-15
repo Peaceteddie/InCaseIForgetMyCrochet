@@ -4,7 +4,6 @@ using InCaseIForgetMyCrochet.Models;
 
 public static class Extensions
 {
-    private static readonly JsonSerializerOptions options = new() { WriteIndented = true };
 
     /// <summary>
     /// Inspects the object and writes it to the console
@@ -22,6 +21,7 @@ public static class Extensions
     /// </code>
     /// </example>
 #if DEBUG
+    private static readonly JsonSerializerOptions options = new() { WriteIndented = true };
     public static T Inspect<T>(this T obj)
     {
         Console.WriteLine(JsonSerializer.Serialize(obj, options));

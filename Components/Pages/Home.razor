@@ -35,15 +35,15 @@
                 <StitchToolbar Pattern="@Pattern"
                     Refresh="@((ToolbarParams Params) => Refresh((Params.amount,Params.type)))" StitchAmount="@stitchAmount"
                     StitchType="@stitchType" />
-                <div class="d-flex">
-                    <button class="my-3 py-2 w-100" @onclick="AddRow">
+                <div class="d-flex justify-content-between">
+                    <button class="my-3 py-2 w-50" @onclick="AddRow">
                         Add Row
                     </button>
-                    <div>
-                        <button class="my-3 py-2 w-100" @onclick="MirrorPatternUp">
+                    <div class="d-flex flex-row justify-content-between">
+                        <button class="my-3 p-2" @onclick="MirrorPatternUp">
                             Mirror Pattern Up ⬆️
                         </button>
-                        <button class="my-3 py-2 w-100" @onclick="MirrorPatternDown">
+                        <button class="my-3 p-2" @onclick="MirrorPatternDown">
                             Mirror Pattern Down ⬇️
                         </button>
                     </div>

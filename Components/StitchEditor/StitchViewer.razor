@@ -4,16 +4,16 @@
 @if (Pattern is not null)
 {
     <table class=" gap-3 my-3 w-100">
-        @foreach (var stitch in Pattern.Rows)
+        @foreach (var row in Pattern.Rows)
         {
             <tr class="d-flex w-100">
                 <ul>
                     <td class="col-1">
                         <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
-                            @onclick="@(async () => {Pattern.Rows.Remove(stitch); await Pattern.SaveChangesAsync(Context);})">X</button>
+                            @onclick="@(async () => await RemoveRow(row))">X</button>
                     </td>
-                    <div id="@(stitch.Id)" class="d-flex w-100" style="position:relative;">
-                        @foreach (var instruction in stitch.Instructions)
+                    <div id="@(row.Id)" class="d-flex w-100" style="position:relative;">
+                        @foreach (var instruction in row.Instructions)
                         {
                             <td style="position:relative;">
                                 <button class="btn-danger" style="
@@ -22,7 +22,7 @@
                                 position:absolute;
                                 bottom:50%;
                                 left:50%;"
-                                    @onclick="@(async() => {stitch.Instructions.Remove(instruction); await Pattern.SaveChangesAsync(Context);})">
+                                    @onclick="@(async() => {row.Instructions.Remove(instruction); await Pattern.SaveChangesAsync(Context);})">
                                     <i class="bi bi-trash" />
                                 </button>
                                 <span class="d-flex rounded-pill" style="
@@ -38,7 +38,7 @@
                                 </span>
                             </td>
                         }
-                        <label for="@(stitch.Id)" class="btn-outline-light p-2 text-center text-dark" style="
+                        <label for="@(row.Id)" class="btn-outline-light p-2 text-center text-dark" style="
                         background: #0001;
                         border-radius:10rem;
                         font-size:.8rem;
@@ -46,12 +46,11 @@
                         left:0%;
                         top:10%;
                         transform: translate(-50%, -50%);">
-                            n:@stitch.Instructions.Count
+                            n:@row.Instructions.Count
                         </label>
                     </div>
                     <td class="col-1">
-                        <button class="btn btn-info text-nowrap"
-                            @onclick="@(async() => {stitch.Instructions.AddRange(Enumerable.Range(0, StitchAmount).Select(_ => new Instruction { StitchType = StitchType })); await Pattern.SaveChangesAsync(Context);})">
+                        <button class="btn btn-info text-nowrap" @onclick="@(async () => await AddStitchBundle(row))">
                             @StitchAmount @StitchType
                         </button>
                     </td>
