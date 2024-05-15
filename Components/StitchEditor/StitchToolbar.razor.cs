@@ -10,7 +10,7 @@ public partial class StitchToolbar
     [Parameter] public EventCallback<int> StitchAmountChanged { get; set; }
     [Parameter] public EventCallback<StitchTypeAbbreviation> StitchTypeChanged { get; set; }
 
-    int _StitchAmount;
+    int _StitchAmount = 1;
     int StitchAmount
     {
         get => _StitchAmount;
