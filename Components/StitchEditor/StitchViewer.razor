@@ -1,4 +1,5 @@
 @using InCaseIForgetMyCrochet.Models;
+@using InCaseIForgetMyCrochet.Shared;
 
 
 @if (Pattern is not null)
@@ -12,32 +13,35 @@
                         <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
                             @onclick="@(async () => await RemoveRow(row))">X</button>
                     </td>
-                    <div id="@(row.Id)" class="d-flex w-100" style="position:relative;">
-                        @foreach (var instruction in row.Instructions)
-                        {
-                            <td style="position:relative;">
-                                <button class="btn-danger" style="
+                    <div id="@(row.Id)" class="d-flex flex-row w-100" style="position:relative;" row-context>
+                        <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions"
+                            OnUpdate="@(((int oldIndex, int newIndex) indices) => SortList(indices, row.Instructions))"
+                            Context="instruction">
+                            <SortableItemTemplate>
+                                <td style="position:relative;">
+                                    <button class="btn-danger" style="
                                 height:2rem;
                                 width:2rem;
                                 position:absolute;
                                 bottom:50%;
                                 left:50%;"
-                                    @onclick="@(async() => {row.Instructions.Remove(instruction); await Pattern.SaveChangesAsync(Context);})">
-                                    <i class="bi bi-trash" />
-                                </button>
-                                <span class="d-flex rounded-pill" style="
-                                background:@(instruction.StitchType.ToPastelColor());
-                                cursor:default;
-                                height:2.5rem;
-                                place-content:center;
-                                place-items:center;
-                                place-self:center;
-                                width:2.5rem;
-                                z-index:0;">
-                                    @instruction.StitchType
-                                </span>
-                            </td>
-                        }
+                                        @onclick="@(async() => {row.Instructions.Remove(instruction); await Pattern.SaveChangesAsync(Context);})">
+                                        <i class="bi bi-trash" />
+                                    </button>
+                                    <span class="d-flex rounded-pill" style="
+                            background:@(instruction.StitchType.ToPastelColor());
+                            cursor:default;
+                            height:2.5rem;
+                            place-content:center;
+                            place-items:center;
+                            place-self:center;
+                            width:2.5rem;
+                            z-index:0;">
+                                        @instruction.StitchType
+                                    </span>
+                                </td>
+                            </SortableItemTemplate>
+                        </SortableList>
                         <label for="@(row.Id)" class="btn-outline-light p-2 text-center text-dark" style="
                         background: #0001;
                         border-radius:10rem;

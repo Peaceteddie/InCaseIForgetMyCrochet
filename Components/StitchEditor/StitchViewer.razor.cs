@@ -32,4 +32,26 @@ public partial class StitchViewer
 
         await Pattern.SaveChangesAsync(Context);
     }
+
+    private async void SortList((int oldIndex, int newIndex) indices, IEnumerable<Instruction> instructions)
+    {
+        if (Pattern is null) return;
+        var (oldIndex, newIndex) = indices;
+
+        var items = instructions.ToList();
+        var itemToMove = items[oldIndex];
+        items.RemoveAt(oldIndex);
+
+        if (newIndex < items.Count)
+        {
+            items.Insert(newIndex, itemToMove);
+        }
+        else
+        {
+            items.Add(itemToMove);
+        }
+
+        await Pattern.SaveChangesAsync(Context);
+        StateHasChanged();
+    }
 }
