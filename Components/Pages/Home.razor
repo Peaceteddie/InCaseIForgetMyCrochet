@@ -48,7 +48,8 @@
                         </button>
                     </div>
                 </div>
-                <StitchViewer Pattern="@Pattern" Refresh="Refresh" StitchAmount="@stitchAmount" StitchType="@stitchType" />
+                <StitchViewer Pattern="@Pattern" Refresh="@(() => Refresh())" StitchAmount="@stitchAmount"
+                    StitchType="@stitchType" />
             </EditForm>
         }
     </div>
@@ -73,9 +74,7 @@
     {
         Pattern = new Pattern();
     }
-    private void Refresh()
-    => Refresh(new());
-    private void Refresh(ToolbarParams Params)
+    private void Refresh(ToolbarParams Params = default)
     {
         var (stitchAmount, stitchType) = Params;
 

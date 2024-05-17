@@ -67,8 +67,6 @@ public static class Extensions
     /// </example>
     public static async Task SaveChangesAsync(this Pattern Pattern, PatternDbContext? Context)
     {
-        if (Pattern is null) return;
-
         try
         {
             Context ??= new PatternDbContext();

@@ -23,6 +23,11 @@
     <script src="_framework\blazor.web.js"></script>
     <script src="bootstrap\js\bootstrap.bundle.min.js"></script>
     <script src="sortablejs\Sortable.js"></script>
+
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
 </body>
 
 </html>
