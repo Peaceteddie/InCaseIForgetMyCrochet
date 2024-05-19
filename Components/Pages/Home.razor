@@ -4,6 +4,7 @@
 @using InCaseIForgetMyCrochet.Models
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.Web
+@using static Extensions;
 @inject PatternDbContext Context
 
 @using ToolbarParams = (int? amount, InCaseIForgetMyCrochet.Models.StitchTypeAbbreviation? type);
@@ -32,9 +33,8 @@
         @if (Pattern != null)
         {
             <EditForm id="stitch-editor" class="container h-100" Model="@Pattern">
-                <StitchToolbar Pattern="@Pattern"
-                    Refresh="@((ToolbarParams Params) => Refresh((Params.amount,Params.type)))" StitchAmount="@stitchAmount"
-                    StitchType="@stitchType" />
+                <StitchToolbar IJustDragged="() => FromToolbar = true" Pattern="@Pattern"
+                    Refresh="@((args) => RefreshEvent!(args))" StitchAmount="@stitchAmount" StitchType="@stitchType" />
                 <div class="d-flex justify-content-between">
                     <button class="my-3 py-2 w-50" @onclick="AddRow">
                         Add Row
@@ -48,7 +48,7 @@
                         </button>
                     </div>
                 </div>
-                <StitchViewer Pattern="@Pattern" Refresh="@(() => Refresh())" StitchAmount="@stitchAmount"
+                <StitchViewer FromToolbar="@FromToolbar" Pattern="@Pattern" StitchAmount="@stitchAmount"
                     StitchType="@stitchType" />
             </EditForm>
         }
@@ -60,14 +60,17 @@
     List<Pattern>? Patterns { get; set; }
     int stitchAmount { get; set; } = 1;
     StitchTypeAbbreviation stitchType { get; set; }
-
+    event Action<ToolbarParams>? RefreshEvent;
+    bool FromToolbar { get; set; } = false;
     protected override async Task OnInitializedAsync()
     {
         Patterns = await Context.Patterns
         .AsTracking()
-        .Include(p => p.Rows)
-        .ThenInclude(r => r.Instructions)
+        .Include(p => p.Rows.OrderBy(r => r.Index))
+        .ThenInclude(r => r.Instructions.OrderBy(i => i.Index))
         .ToListAsync();
+
+        RefreshEvent += Refresh;
     }
 
     private void NewPattern()

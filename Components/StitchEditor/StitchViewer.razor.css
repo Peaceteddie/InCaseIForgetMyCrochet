@@ -4,3 +4,21 @@ div[row-context] {
     width: 100%;
   }
 }
+
+.center-all {
+  place-content: center;
+  place-items: center;
+  place-self: center;
+}
+
+.radial-button {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

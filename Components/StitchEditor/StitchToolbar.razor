@@ -1,5 +1,7 @@
 @using InCaseIForgetMyCrochet.Models;
+@using InCaseIForgetMyCrochet.Shared;
 @using Microsoft.EntityFrameworkCore;
+@using static Extensions;
 @if (Pattern is not null)
 {
     <div class="d-flex flex-column gap-3">
@@ -13,8 +15,11 @@
         <div class="d-flex input-group justify-content-center w-100">
             <div class="d-flex">
                 <label class="btn-info input-group-text justify-content-end" for="StitchAmount">Stitch Amount:</label>
-                <InputNumber id="StitchAmount" class="form-control" @bind-Value="StitchAmount" @bind-Value:after="@(async () => await Refresh.InvokeAsync((StitchAmount,null)))" min="1" max="1000" step="1" />
-                <InputSelect id="StitchType" class="form-control" @bind-Value="StitchType" @bind-Value:after="@(async () => await Refresh.InvokeAsync((null,StitchType)))">
+                <InputNumber id="StitchAmount" class="form-control" @bind-Value="StitchAmount"
+                    @bind-Value:after="@(async () => await Refresh.InvokeAsync((StitchAmount,null)))" min="1" max="1000"
+                    step="1" />
+                <InputSelect id="StitchType" class="form-control" @bind-Value="StitchType"
+                    @bind-Value:after="@(async () => await Refresh.InvokeAsync((null,StitchType)))">
                     @foreach (var StitchType in Enum.GetValues<StitchTypeAbbreviation>())
                     {
                         <option value="@StitchType">@StitchType</option>
@@ -41,15 +46,17 @@
                 @onclick="@(async() => {StitchAmount = Math.Max(1, StitchAmount + 100);await Refresh.InvokeAsync((StitchAmount,null));})">+100</button>
         </div>
 
-            <div id="add-single-toolbar" class="input-group">
-                @foreach (var type in Enum.GetValues<StitchTypeAbbreviation>())
-{
-            <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
-                data-bs-toggle="tooltip" title="@type.ToStitchType()"
-                @onclick="@(async () => await AddStitch(type))">
-                @type
-            </button>
-}
+        <div id="add-single-toolbar" class="input-group">
+            <SortableList Id="TOOLBAR" Items="@StitchTypes.ToList()" Context="type"
+                OnRemove="@(async () => await IJustDragged.InvokeAsync())">
+                <SortableItemTemplate>
+                    <button class="btn btn-outline-dark" type="button" style="background-color:@(type.ToPastelColor());"
+                        data-bs-toggle="tooltip" title="@type.ToStitchType()"
+                        @onclick="@(async () => await AddStitch(type))">
+                        @type
+                    </button>
+                </SortableItemTemplate>
+            </SortableList>
         </div>
     </div>
-    }
+}

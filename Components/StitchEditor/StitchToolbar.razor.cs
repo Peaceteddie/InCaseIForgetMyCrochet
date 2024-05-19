@@ -6,10 +6,11 @@ namespace InCaseIForgetMyCrochet.Components.StitchEditor;
 public partial class StitchToolbar
 {
     [Parameter] public Pattern? Pattern { get; set; }
+    [Parameter] public EventCallback IJustDragged { get; set; }
     [Parameter] public EventCallback<(int?, StitchTypeAbbreviation?)> Refresh { get; set; }
     [Parameter] public int StitchAmount { get; set; }
     [Parameter] public StitchTypeAbbreviation StitchType { get; set; }
-    PatternDbContext Context { get; set; } = new PatternDbContext();
+    [Inject] PatternDbContext Context { get; set; } = default!;
 
     async Task AddStitch(StitchTypeAbbreviation type)
     {

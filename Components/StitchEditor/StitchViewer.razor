@@ -1,57 +1,53 @@
 @using InCaseIForgetMyCrochet.Models;
 @using InCaseIForgetMyCrochet.Shared;
+@using Microsoft.EntityFrameworkCore
 
 
 @if (Pattern is not null)
 {
-    <table class=" gap-3 my-3 w-100">
-        @foreach (var row in Pattern.Rows)
+    <table class="gap-3 my-3 w-100">
+        @foreach (Row row in Pattern.Rows.OrderBy(r => r.Index))
         {
             <tr class="d-flex w-100">
                 <ul>
                     <td class="col-1">
                         <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
-                            @onclick="@(async () => await RemoveRow(row))">X</button>
+                            @onclick="@(async () => await RemoveRow(row))">@row.Index</button>
                     </td>
-                    <div id="@(row.Id)" class="d-flex flex-row w-100" style="position:relative;" row-context>
-                        <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions"
-                            OnUpdate="@(((int oldIndex, int newIndex) indices) => SortList(indices, row.Instructions))"
-                            Context="instruction">
+                    <div id="@(row.Index)" class="d-flex flex-row w-100" style="position:relative;" row-context>
+                        <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions" Context="instruction"
+                            OnAdd="async args => await InsertInstruction(row, args.newIndex, args.type)"
+                            OnRemove="async args => await RemoveInstruction(row, args.oldIndex)"
+                            OnUpdate="async args => await UpdateInstruction(row, args.oldIndex, args.newIndex)">
                             <SortableItemTemplate>
-                                <td style="position:relative;">
-                                    <button class="btn-danger" style="
-                                height:2rem;
-                                width:2rem;
-                                position:absolute;
-                                bottom:50%;
-                                left:50%;"
-                                        @onclick="@(async() => {row.Instructions.Remove(instruction); await Pattern.SaveChangesAsync(Context);})">
+                                <td style="position:relative;" key="@instruction.Id">
+                                    <button class="btn-danger"
+                                        style="cursor:pointer;height:2rem;width:2rem;position:absolute;bottom:50%;left:50%;z-index:0;"
+                                        @onclick="@(async() => await RemoveInstruction(row, instruction.Index))">
                                         <i class="bi bi-trash" />
                                     </button>
-                                    <span class="d-flex rounded-pill" style="
-                            background:@(instruction.StitchType.ToPastelColor());
-                            cursor:default;
-                            height:2.5rem;
-                            place-content:center;
-                            place-items:center;
-                            place-self:center;
-                            width:2.5rem;
-                            z-index:0;">
+                                    <span class="center-all d-flex rounded-pill"
+                                        @onclick="@(() => selectedInstruction = instruction)"
+                                        style="background:@(instruction.StitchType.ToPastelColor());cursor:pointer;height:2.5rem;width:2.5rem;z-index:1;">
                                         @instruction.StitchType
                                     </span>
+                                    @if (selectedInstruction?.Equals(instruction) ?? false)
+                                    {
+                                        @foreach ((StitchTypeAbbreviation type, int index) option in StitchTypesWithIndex)
+                                        {
+                                            <div @onclick="@(() => selectedInstruction= null)"
+                                                style="position:fixed;height:100vh;width:100vw;">
+                                            </div>
+                                            <span class="center-all d-flex rounded-pill"
+                                                @onclick="@(() => ChangeStitchType(option.type, instruction))"
+                                                style="background:@(option.type.ToPastelColor());cursor:pointer;height:2.5rem;width:2.5rem;@GetButtonStyle(option.index, amountOfStitchTypes)">
+                                                @option.type
+                                            </span>
+                                        }
+                                    }
                                 </td>
                             </SortableItemTemplate>
                         </SortableList>
-                        <label for="@(row.Id)" class="btn-outline-light p-2 text-center text-dark" style="
-                        background: #0001;
-                        border-radius:10rem;
-                        font-size:.8rem;
-                        position:absolute;
-                        left:0%;
-                        top:10%;
-                        transform: translate(-50%, -50%);">
-                            n:@row.Instructions.Count
-                        </label>
                     </div>
                     <td class="col-1">
                         <button class="btn btn-info text-nowrap" @onclick="@(async () => await AddStitchBundle(row))">

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Models;
+using Microsoft.VisualBasic;
 
 public static class Extensions
 {
@@ -34,14 +35,15 @@ public static class Extensions
         Console.WriteLine(JsonSerializer.Serialize(obj, options));
         return obj;
     }
-
-    public static List<Row> MirrorPattern(this List<Row> rows)
-    {
-        rows.AddRange([.. rows.OrderByDescending(x => x.Id)]);
-        return rows;
-    }
 #endif
 
+    public static IEnumerable<StitchTypeAbbreviation> StitchTypes
+    => Enum.GetValues<StitchTypeAbbreviation>();
+    public static void Log(this Exception e)
+    {
+        Console.WriteLine(e.Message);
+        Console.WriteLine(e.StackTrace);
+    }
     /// <summary>
     /// Saves the changes of the <paramref name="Pattern"/> in the <paramref name="Context"/> database
     /// </summary>
