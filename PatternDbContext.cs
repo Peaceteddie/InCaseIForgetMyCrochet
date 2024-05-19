@@ -5,12 +5,21 @@ using DotNetEnv;
 namespace InCaseIForgetMyCrochet;
 public class PatternDbContext : DbContext
 {
-    public PatternDbContext() { }
-    public PatternDbContext(DbContextOptions options) : base(options) { }
-
     public DbSet<Pattern> Patterns { get; set; }
 
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Pattern>()
+            .HasMany(p => p.Rows)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Row>()
+            .HasMany(r => r.Instructions)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+    }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         IEnumerable<KeyValuePair<string, string>>? dotEnv = Env.TraversePath().Load();

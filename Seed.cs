@@ -8,6 +8,7 @@ public class Seed
     {
         using var db = new PatternDbContext();
         db.Database.EnsureDeleted();
+        db.Database.EnsureCreated();
     }
 
     public static void Run()

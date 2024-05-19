@@ -2,6 +2,7 @@
 @using InCaseIForgetMyCrochet.Shared;
 @using Microsoft.EntityFrameworkCore
 
+@namespace InCaseIForgetMyCrochet.Components.StitchEditor
 
 @if (Pattern is not null)
 {
@@ -14,12 +15,12 @@
                         <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
                             @onclick="@(async () => await RemoveRow(row))">
                             <i class="bi bi-trash"></i>
-                            </button>
+                        </button>
                     </td>
                     <div id="@(row.Index)" class="d-flex flex-row w-100" style="position:relative;" row-context>
                         <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions" Context="instruction"
                             OnAdd="async args => await InsertInstruction(row, args.newIndex, args.type)"
-                            OnRemove="async args => await RemoveInstruction(row, args.oldIndex)"
+                            OnRemove="async args => await RemoveInstruction(row, args.oldIndex, args.id)"
                             OnUpdate="async args => await UpdateInstruction(row, args.oldIndex, args.newIndex)">
                             <SortableItemTemplate>
                                 <td style="position:relative;" key="@instruction.Id">

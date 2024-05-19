@@ -50,7 +50,8 @@ export function init(
       component.invokeMethodAsync(
         "OnRemoveJS",
         event.oldDraggableIndex,
-        event.newDraggableIndex
+        event.newDraggableIndex,
+        event.to.id
       );
     },
   });

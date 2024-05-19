@@ -12,7 +12,7 @@ public partial class SortableList<T> : ComponentBase, IDisposable
     [Parameter] public RenderFragment<T>? SortableItemTemplate { get; set; }
     [Parameter, AllowNull] public List<T> Items { get; set; }
     [Parameter] public EventCallback<(int oldIndex, int newIndex, StitchTypeAbbreviation type)> OnAdd { get; set; }
-    [Parameter] public EventCallback<(int oldIndex, int newIndex)> OnRemove { get; set; }
+    [Parameter] public EventCallback<(int oldIndex, int newIndex, string id)> OnRemove { get; set; }
     [Parameter] public EventCallback<(int oldIndex, int newIndex)> OnUpdate { get; set; }
     [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString();
     [Parameter] public string Group { get; set; } = Guid.NewGuid().ToString();
@@ -41,9 +41,9 @@ public partial class SortableList<T> : ComponentBase, IDisposable
             OnAdd.InvokeAsync((oldIndex, newIndex, default));
     }
     [JSInvokable]
-    public void OnRemoveJS(int oldIndex, int newIndex)
+    public void OnRemoveJS(int oldIndex, int newIndex, string id)
     {
-        OnRemove.InvokeAsync((oldIndex, newIndex));
+        OnRemove.InvokeAsync((oldIndex, newIndex, id));
     }
     [JSInvokable]
     public void OnUpdateJS(int oldIndex, int newIndex)

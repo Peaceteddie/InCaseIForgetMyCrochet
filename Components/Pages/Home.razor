@@ -11,16 +11,19 @@
 
 @rendermode InteractiveServer
 
-<div class="container d-flex flex-column gap-5">
+<div class="d-flex flex-column gap-5 p-5">
     <h1>Home</h1>
-    <div class="d-flex gap-5">
-        <ul class="list-group">
+    <div class="d-flex gap-5 w-100">
+        <ul class="col-3 list-group">
             @if (Patterns != null)
             {
                 @foreach (var pattern in Patterns)
                 {
-                    <li class="list-group-item" style="width:15vw;">
-                        <button class="btn btn-primary w-100" @onclick="@(() => SelectPattern(pattern))">
+                    <li class="d-flex flex-row list-group-item w-100">
+                        <button class="btn btn-danger col-2" @onclick="()=>DeletePattern(pattern)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-primary col-10" @onclick="() => SelectPattern(pattern)">
                             <h4>@pattern.Name</h4>
                         </button>
                     </li>
@@ -30,38 +33,43 @@
                 </button>
             }
         </ul>
-        @if (Pattern != null)
-        {
-            <EditForm id="stitch-editor" class="container h-100" Model="@Pattern">
-                <StitchToolbar IJustDragged="() => FromToolbar = true" Pattern="@Pattern"
-                    Refresh="@((args) => RefreshEvent!(args))" StitchAmount="@stitchAmount" StitchType="@stitchType" />
-                <div class="d-flex justify-content-between">
-                    <button class="my-3 py-2 w-50" @onclick="AddRow">
-                        Add Row
-                    </button>
-                    <div class="d-flex flex-row justify-content-between">
-                        <button class="my-3 p-2" @onclick="MirrorPatternUp">
-                            Mirror Pattern Up ⬆️
+        <div class="col-8 d-flex">
+            @if (Pattern != null)
+            {
+                <EditForm id="stitch-editor" class="container h-100" Model="@Pattern">
+                    <StitchToolbar IJustDragged="() => FromToolbar = true" Pattern="@Pattern"
+                        Refresh="@((args) => RefreshEvent!(args))" StitchAmount="@stitchAmount" StitchType="@stitchType" />
+                    <div class="d-flex justify-content-between">
+                        <button class="my-3 py-2 w-50" @onclick="AddRow">
+                            Add Row
                         </button>
-                        <button class="my-3 p-2" @onclick="MirrorPatternDown">
-                            Mirror Pattern Down ⬇️
-                        </button>
+                        <div class="d-flex flex-row justify-content-between">
+                            <button class="my-3 p-2" @onclick="MirrorPatternUp">
+                                Mirror Pattern Up ⬆️
+                            </button>
+                            <button class="my-3 p-2" @onclick="MirrorPatternDown">
+                                Mirror Pattern Down ⬇️
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <StitchViewer FromToolbar="@FromToolbar" Pattern="@Pattern" StitchAmount="@stitchAmount"
-                    StitchType="@stitchType" />
-            </EditForm>
-        }
+                    <StitchViewer FromToolbar="@FromToolbar" Pattern="@Pattern" StitchAmount="@stitchAmount"
+                        StitchType="@stitchType" />
+                </EditForm>
+            }
+        </div>
     </div>
 </div>
 
 @code {
     Pattern? Pattern { get; set; }
     List<Pattern>? Patterns { get; set; }
+    bool FromToolbar { get; set; } = false;
+
     int stitchAmount { get; set; } = 1;
     StitchTypeAbbreviation stitchType { get; set; }
+
     event Action<ToolbarParams>? RefreshEvent;
-    bool FromToolbar { get; set; } = false;
+
     protected override async Task OnInitializedAsync()
     {
         Patterns = await Context.Patterns
@@ -73,78 +81,65 @@
         RefreshEvent += Refresh;
     }
 
-    private void NewPattern()
+    private async Task NewPattern()
     {
+        if (Patterns is null) return;
         Pattern = new Pattern();
+        Patterns.Add(Pattern);
+        await Context.SaveChangesAsync();
+        StateHasChanged();
     }
     private void Refresh(ToolbarParams Params = default)
     {
         var (stitchAmount, stitchType) = Params;
-
-        if (stitchAmount.HasValue)
-        {
-            this.stitchAmount = stitchAmount.Value;
-        }
-        if (stitchType.HasValue)
-        {
-            this.stitchType = stitchType.Value;
-        }
+        this.stitchAmount = stitchAmount ?? this.stitchAmount;
+        this.stitchType = stitchType ?? this.stitchType;
         StateHasChanged();
     }
     private void SelectPattern(Pattern pattern)
+    => Pattern = pattern;
+    private void SetupIndices()
     {
-        Pattern = pattern;
+        if (Pattern is null) return;
+        Pattern.Rows.ForEach(row => row.Index = Pattern.Rows.IndexOf(row));
+        Pattern.Rows.ForEach(row => row.Instructions.ForEach(instruction => instruction.Index =
+        row.Instructions.IndexOf(instruction)));
     }
 
     private async Task AddRow()
     {
         if (Pattern is null) return;
-        if (Pattern.Rows is null)
-        {
-            Pattern.Rows = new List<Row>();
-        }
-        if (Pattern.Rows.Count == 0)
-        {
-            Pattern.Rows.Add(new Row());
-        }
-        else
-        {
-            Pattern.Rows = [new Row(), .. Pattern.Rows.Select(r => r.Clone())];
-        }
+
+        Pattern.Rows = Pattern.Rows.Prepend<Row>(new()).ToList();
+
+        SetupIndices();
         await Pattern.SaveChangesAsync(Context);
+        StateHasChanged();
+    }
+    private async Task DeletePattern(Pattern pattern)
+    {
+        if (Patterns is null) return;
+        Patterns.Remove(pattern);
+        await pattern.DeleteAsync(Context);
+        StateHasChanged();
     }
     private async Task MirrorPatternUp()
     {
         if (Pattern is null) return;
-
-        var normalRows = Pattern.Rows
-        .Select(r => r.Clone())
-        .ToList();
-
-        var reversedRows = Pattern.Rows
-        .Select(r => r.Clone())
-        .Reverse()
-        .ToList();
-        var newRows = new List<Row>();
-        newRows.AddRange(reversedRows);
-        newRows.AddRange(normalRows);
-
-        Pattern.Rows = newRows;
-
+        var reverse = Pattern.Rows.Select(r => r.Clone()).Reverse();
+        Pattern.Rows.InsertRange(0, reverse);
+        SetupIndices();
         await Pattern.SaveChangesAsync(Context);
+        StateHasChanged();
     }
     private async Task MirrorPatternDown()
     {
         if (Pattern is null) return;
-
-        var reversedRows = Pattern.Rows
-        .Select(r => r.Clone())
-        .Reverse()
-        .ToList();
-
-        Pattern.Rows.AddRange(reversedRows);
-
+        var reverse = Pattern.Rows.Select(r => r.Clone()).Reverse();
+        Pattern.Rows.AddRange(reverse);
+        SetupIndices();
         await Pattern.SaveChangesAsync(Context);
+        StateHasChanged();
     }
 }
 
@@ -166,11 +161,13 @@
         }
 
         label:first-child {
+            background: var(--bs-info);
             border-top-left-radius: 10rem;
             border-bottom-left-radius: 10rem;
         }
 
         label:last-child {
+            background: var(--bs-info);
             border-top-right-radius: 10rem;
             border-bottom-right-radius: 10rem;
         }

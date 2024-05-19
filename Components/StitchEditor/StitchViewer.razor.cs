@@ -11,7 +11,7 @@ public partial class StitchViewer
     [Parameter] public StitchTypeAbbreviation StitchType { get; set; }
     [Parameter] public bool FromToolbar { get; set; } = false;
     [Inject] PatternDbContext Context { get; set; } = default!;
-
+    
     static readonly int amountOfStitchTypes = Enum.GetValues(typeof(StitchTypeAbbreviation)).Length;
     static readonly SemaphoreSlim saveLock = new(1, 1);
 
@@ -57,10 +57,10 @@ public partial class StitchViewer
 
         await SaveSafely();
     }
-    async Task RemoveInstruction(Row row, int oldIndex)
+    async Task RemoveInstruction(Row row, int oldIndex, string? targetID = null)
     {
         if (Pattern is null) return;
-
+        if (targetID == "TOOLBAR") return;
         LastType = Pattern.Rows[row.Index].Instructions[oldIndex].StitchType;
         Pattern.Rows[row.Index].Instructions.RemoveAt(oldIndex);
 

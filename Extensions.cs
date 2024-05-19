@@ -44,6 +44,23 @@ public static class Extensions
         Console.WriteLine(e.Message);
         Console.WriteLine(e.StackTrace);
     }
+
+    public static async Task DeleteAsync(this Pattern Pattern, PatternDbContext? Context)
+    {
+        try
+        {
+            Context ??= new PatternDbContext();
+
+            Context.Patterns.Remove(Pattern);
+            await Context.SaveChangesAsync();
+            await Context.Entry(Pattern).ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception while deleting pattern: {ex.Message}");
+        }
+    }
+
     /// <summary>
     /// Saves the changes of the <paramref name="Pattern"/> in the <paramref name="Context"/> database
     /// </summary>
