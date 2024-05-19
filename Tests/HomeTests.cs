@@ -48,7 +48,7 @@ public class StitchEditorTests
         Assert.Equal(2, updatedPattern.Rows[2].Instructions.Count);
         Assert.Single(updatedPattern.Rows[3].Instructions);
         Assert.All(updatedPattern.Rows, row => Assert.All(row.Instructions, instruction => Assert.Equal(StitchTypeAbbreviation.ch, instruction.StitchType)));
-        Assert.True(updatedPattern.Rows.Aggregate(true, (acc, row) => acc && (acc = row.Instructions.Select(i => i.Id).Distinct().Count() == row.Instructions.Count).Inspect()));
+        Assert.True(updatedPattern.Rows.Aggregate(true, (acc, row) => acc && (acc = row.Instructions.Select(i => i.Id).Distinct().Count() == row.Instructions.Count)));
     }
 
     static Pattern MirrorPatternDown(Pattern Pattern)

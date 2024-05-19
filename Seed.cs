@@ -4,6 +4,12 @@ namespace InCaseIForgetMyCrochet;
 
 public class Seed
 {
+    public static void Clear()
+    {
+        using var db = new PatternDbContext();
+        db.Database.EnsureDeleted();
+    }
+
     public static void Run()
     {
         using var db = new PatternDbContext();

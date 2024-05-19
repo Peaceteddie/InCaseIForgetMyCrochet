@@ -1,6 +1,10 @@
 using InCaseIForgetMyCrochet;
 using InCaseIForgetMyCrochet.Components;
 var builder = WebApplication.CreateBuilder(args);
+
+if (args.Contains("--cleardb")) Seed.Clear();
+if (args.Contains("--seed")) Seed.Run();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddDbContext<PatternDbContext>();
@@ -9,10 +13,6 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
-}
-else
-{
-    Seed.Run();
 }
 app.UseHttpsRedirection();
 app.UseStaticFiles();

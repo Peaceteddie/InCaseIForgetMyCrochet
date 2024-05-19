@@ -50,7 +50,6 @@ public partial class StitchViewer
     }
     async Task InsertInstruction(Row row, int newIndex, StitchTypeAbbreviation type)
     {
-        $"{row.Index} {newIndex} {type} {selectedInstruction?.StitchType}".Inspect();
         if (Pattern is null) return;
 
         Pattern.Rows[row.Index].Instructions

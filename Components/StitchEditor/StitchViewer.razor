@@ -12,7 +12,9 @@
                 <ul>
                     <td class="col-1">
                         <button class="btn btn-danger" type="button" style="padding:.5rem 1rem;"
-                            @onclick="@(async () => await RemoveRow(row))">@row.Index</button>
+                            @onclick="@(async () => await RemoveRow(row))">
+                            <i class="bi bi-trash"></i>
+                            </button>
                     </td>
                     <div id="@(row.Index)" class="d-flex flex-row w-100" style="position:relative;" row-context>
                         <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions" Context="instruction"
