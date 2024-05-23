@@ -6,7 +6,7 @@
 
 @if (Pattern is not null)
 {
-    <table class="gap-3 my-3 w-100">
+    <table class="gap-3 my-3 w-100" style="user-select:none;">
         @foreach (Row row in Pattern.Rows.OrderBy(r => r.Index))
         {
             <tr class="d-flex w-100">
@@ -17,13 +17,14 @@
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>
-                    <div id="@(row.Index)" class="d-flex flex-row w-100" style="position:relative;" row-context>
+                    <div id="@(row.Index)" class="d-flex flex-column w-100" style="position:relative;" row-context>
                         <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions" Context="instruction"
                             OnAdd="async args => await InsertInstruction(row, args.newIndex, args.type)"
                             OnRemove="async args => await RemoveInstruction(row, args.oldIndex, args.id)"
                             OnUpdate="async args => await UpdateInstruction(row, args.oldIndex, args.newIndex)">
                             <SortableItemTemplate>
-                                <td style="position:relative;" key="@instruction.Id">
+                                <td class="d-flex flex-row justify-content-center" style="position:relative;"
+                                    key="@instruction.Id">
                                     <button class="btn-danger"
                                         style="cursor:pointer;height:2rem;width:2rem;position:absolute;bottom:50%;left:50%;z-index:0;"
                                         @onclick="@(async() => await RemoveInstruction(row, instruction.Index))">
@@ -51,6 +52,27 @@
                                 </td>
                             </SortableItemTemplate>
                         </SortableList>
+                        <div class="input-group">
+                            @{
+                                string height = "2rem";
+                            }
+                            <input type="text" class="form-control" disabled="@(selectedRowNotes != row.Id)"
+                                placeholder="Description" @bind-value="row.Notes"
+                                @bind-value:after="@(async () => await Pattern.SaveChangesAsync(Context))"
+                                style="@($"height:{height};")" />
+                            <button class=" input-group-text" type="button" style="@($"height:{height};")"
+                                @onclick="@(()=> selectedRowNotes = selectedRowNotes == row.Id ? null : row.Id)">
+                                @if (selectedRowNotes == row.Id)
+                                {
+                                    <i class="bi bi-unlock"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-lock"></i>
+
+                                }
+                            </button>
+                        </div>
                     </div>
                     <td class="col-1">
                         <button class="btn btn-info text-nowrap" @onclick="@(async () => await AddStitchBundle(row))">

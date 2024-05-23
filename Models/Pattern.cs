@@ -23,6 +23,7 @@ public class Row
     [Key] public int Id { get; set; }
     [Required] public int Index { get; set; }
     [Required] public List<Instruction> Instructions { get; set; } = [];
+    public string? Notes { get; set; }
 
     public Row Clone()
     {

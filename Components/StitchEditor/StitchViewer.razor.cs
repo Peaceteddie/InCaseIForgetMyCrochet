@@ -11,7 +11,7 @@ public partial class StitchViewer
     [Parameter] public StitchTypeAbbreviation StitchType { get; set; }
     [Parameter] public bool FromToolbar { get; set; } = false;
     [Inject] PatternDbContext Context { get; set; } = default!;
-    
+
     static readonly int amountOfStitchTypes = Enum.GetValues(typeof(StitchTypeAbbreviation)).Length;
     static readonly SemaphoreSlim saveLock = new(1, 1);
 
@@ -28,6 +28,7 @@ public partial class StitchViewer
         return $"position:absolute; left:calc(50% + {x.ToString(CultureInfo.InvariantCulture)}px); top:calc(50% - {y.ToString(CultureInfo.InvariantCulture)}px); transform:translate(-50%, -50%);z-index:{10 + index};";
     }
 
+    int? selectedRowNotes;
     Instruction? selectedInstruction;
     StitchTypeAbbreviation? LastType;
 
