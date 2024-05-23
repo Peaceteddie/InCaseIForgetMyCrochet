@@ -2,17 +2,30 @@
 @using InCaseIForgetMyCrochet
 @using InCaseIForgetMyCrochet.Components.StitchEditor
 @using InCaseIForgetMyCrochet.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.Web
-@using static Extensions;
-@inject PatternDbContext Context
+@using System.Security.Claims
+@using static Extensions
 
 @using ToolbarParams = (int? amount, InCaseIForgetMyCrochet.Models.StitchTypeAbbreviation? type);
 
-@rendermode InteractiveServer
+@inject PatternDbContext Context
+
 
 <div class="d-flex flex-column gap-5 p-5">
-    <h1>Home</h1>
+    <div class="d-flex justify-content-between">
+        @if (User?.Identity?.IsAuthenticated == true)
+        {
+            <h1>Welcome Home @User.Identity.Name</h1>
+            <a href="/account/logout">Logout <i class="bi bi-box-arrow-in-right"></i></a>
+        }
+        else
+        {
+            <h1>Welcome Home Stranger</h1>
+            <a href="/account/login"><i class="bi bi-box-arrow-in-left"></i> Login</a>
+        }
+    </div>
     <div class="d-flex gap-5 w-100">
         <ul class="col-3 list-group">
             @if (Patterns != null)
@@ -61,14 +74,16 @@
 </div>
 
 @code {
+    [CascadingParameter] Task<AuthenticationState>? Auth { get; set; }
+    ClaimsPrincipal? User => (Auth?.Result)?.User;
+
     Pattern? Pattern { get; set; }
     List<Pattern>? Patterns { get; set; }
     bool FromToolbar { get; set; } = false;
+    event Action<ToolbarParams>? RefreshEvent;
 
     int stitchAmount { get; set; } = 1;
     StitchTypeAbbreviation stitchType { get; set; }
-
-    event Action<ToolbarParams>? RefreshEvent;
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,9 +124,7 @@
     private async Task AddRow()
     {
         if (Pattern is null) return;
-
         Pattern.Rows = Pattern.Rows.Prepend<Row>(new()).ToList();
-
         SetupIndices();
         await Pattern.SaveChangesAsync(Context);
         StateHasChanged();

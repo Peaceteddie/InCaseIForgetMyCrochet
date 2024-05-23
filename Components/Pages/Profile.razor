@@ -1,0 +1,22 @@
+@page "/Profile"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@attribute [Authorize]
+
+@if (User?.Identity?.IsAuthenticated == true)
+{
+        <h1>Hello, @User.Identity.Name!</h1>
+        <p>You are authenticated.</p>
+}
+else
+{
+        <h1>Hello, stranger!</h1>
+        <p>You are not authenticated.</p>
+}
+
+@code {
+        [CascadingParameter] Task<AuthenticationState>? Auth { get; set; }
+        ClaimsPrincipal? User => (Auth?.Result)?.User;
+}
