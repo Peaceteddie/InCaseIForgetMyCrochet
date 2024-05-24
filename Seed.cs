@@ -19,6 +19,7 @@ public class Seed
         db.Patterns.Add(new Pattern
         {
             Name = "Simple Scarf",
+            Notes = "A simple scarf pattern",
             Rows = Enumerable.Range(0, 9).Select(i => new Row
             {
                 Index = i,

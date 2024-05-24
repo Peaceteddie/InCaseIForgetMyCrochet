@@ -1,6 +1,6 @@
 @using InCaseIForgetMyCrochet.Models;
 @using InCaseIForgetMyCrochet.Shared;
-@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore;
 
 @namespace InCaseIForgetMyCrochet.Components.StitchEditor
 
@@ -56,10 +56,6 @@
                             @{
                                 string height = "2rem";
                             }
-                            <input type="text" class="form-control" disabled="@(selectedRowNotes != row.Id)"
-                                placeholder="Description" @bind-value="row.Notes"
-                                @bind-value:after="@(async () => await Pattern.SaveChangesAsync(Context))"
-                                style="@($"height:{height};")" />
                             <button class=" input-group-text" type="button" style="@($"height:{height};")"
                                 @onclick="@(()=> selectedRowNotes = selectedRowNotes == row.Id ? null : row.Id)">
                                 @if (selectedRowNotes == row.Id)
@@ -72,6 +68,10 @@
 
                                 }
                             </button>
+                            <textarea @bind="row.Notes" class="form-control" disabled="@(selectedRowNotes != row.Id)"
+                                placeholder="Description"
+                                @oninput="(e)=> {row.Notes = e.Value?.ToString(); Context.SaveChanges();}"
+                                style="@($"height:{height};")" />
                         </div>
                     </div>
                     <td class="col-1">
@@ -83,4 +83,9 @@
             </tr>
         }
     </table>
+
+    <div style="bottom:1%;position:fixed;right:1%;width:20%;z-index:1;">
+        <textarea class="form-control" placeholder="Pattern Notes" @bind="Pattern.Notes"
+            @bind:after="()=>Context.SaveChanges()" />
+    </div>
 }
