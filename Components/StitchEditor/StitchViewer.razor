@@ -16,9 +16,11 @@
                             @onclick="@(async () => await RemoveRow(row))">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <label for="@($"{row.Id}-stitch-row")" class="align-items-center d-flex flex-grow-1 justify-content-center text-center">
-                            n: @row.Instructions.Count
-                            </label>
+                        <label for="@($"{row.Id}-stitch-row")"
+                            class="align-items-center bg-info-subtle border d-flex flex-grow-1 fs-5 justify-content-center text-center"
+                            title="Amount of stitches">
+                            ➰@row.Instructions.Count
+                        </label>
                     </td>
                     <div id="@(row.Index)" class="d-flex flex-column w-100" style="position:relative;" row-context>
                         <SortableList Id="@($"{row.Id}-stitch-row")" Items="row.Instructions" Context="instruction"
@@ -87,3 +89,7 @@
         }
     </table>
 }
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
