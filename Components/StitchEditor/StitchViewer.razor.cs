@@ -95,8 +95,8 @@ public partial class StitchViewer
     {
         if (Pattern is null) return;
         var instruction = Pattern.Rows[row.Index].Instructions[oldIndex];
-        Pattern.Rows[row.Index].Instructions.Insert(newIndex, instruction);
-        Pattern.Rows[row.Index].Instructions.RemoveAt(oldIndex < newIndex ? oldIndex : oldIndex + 1);
+        Pattern.Rows[row.Index].Instructions.Insert(newIndex > oldIndex ? ++newIndex : newIndex, instruction);
+        Pattern.Rows[row.Index].Instructions.RemoveAt(oldIndex + (newIndex > oldIndex ? 0 : 1));
         await SaveSafely();
     }
 }
