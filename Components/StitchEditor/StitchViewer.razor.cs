@@ -49,6 +49,38 @@ public partial class StitchViewer
         selectedInstruction = null;
         await SaveSafely();
     }
+    async Task CopyRowDown(Row row)
+    {
+        if (Pattern is null) return;
+        Pattern.Rows.Insert(row.Index + 1,
+        new Row
+        {
+            Index = row.Index + 1,
+            Instructions = row.Instructions.Select(i =>
+            new Instruction
+            {
+                Index = i.Index,
+                StitchType = i.StitchType
+            }).ToList()
+        });
+        await SaveSafely();
+    }
+    async Task CopyRowUp(Row row)
+    {
+        if (Pattern is null) return;
+        Pattern.Rows.Insert(row.Index,
+        new Row
+        {
+            Index = row.Index,
+            Instructions = row.Instructions.Select(i =>
+            new Instruction
+            {
+                Index = i.Index,
+                StitchType = i.StitchType
+            }).ToList()
+        });
+        await SaveSafely();
+    }
     async Task InsertInstruction(Row row, int newIndex, StitchTypeAbbreviation type)
     {
         if (Pattern is null) return;
