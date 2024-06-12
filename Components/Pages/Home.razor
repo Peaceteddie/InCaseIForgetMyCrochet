@@ -10,8 +10,10 @@
 
 @using ToolbarParams = (int? amount, InCaseIForgetMyCrochet.Models.StitchTypeAbbreviation? type);
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject PatternDbContext Context
 @rendermode InteractiveServer
+@attribute [Authorize]
 
 
 <div class="d-flex flex-column gap-5 p-5">
@@ -75,8 +77,8 @@
 </div>
 
 @code {
-    [CascadingParameter] Task<AuthenticationState>? Auth { get; set; }
-    ClaimsPrincipal? User => (Auth?.Result)?.User;
+    AuthenticationState? Auth { get; set; }
+    ClaimsPrincipal? User => Auth?.User;
 
     Pattern? Pattern { get; set; }
     List<Pattern>? Patterns { get; set; }
@@ -88,6 +90,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
         Patterns = await Context.Patterns
         .AsTracking()
         .Include(p => p.Rows.OrderBy(r => r.Index))
@@ -158,6 +162,10 @@
 }
 
 <style>
+    body {
+        --bg-deep-purple: #60f2;
+    }
+
     form {
 
         .btn,
@@ -175,35 +183,21 @@
         }
 
         label:first-child {
-            background: #60f2;
+            background: var(--bg-deep-purple);
             border-top-left-radius: 10rem;
             border-bottom-left-radius: 10rem;
         }
 
         label:last-child {
-            background: #60f2;
+            background: var(--bg-deep-purple);
             border-top-right-radius: 10rem;
             border-bottom-right-radius: 10rem;
         }
 
-        #add-single-toolbar {
+        #add-single-toolbar *,
+        #add-multiple-toolbar * {
             display: flex;
             flex: 1 1 auto;
-
-            & * {
-                display: flex;
-                flex: 1 1 auto;
-            }
-        }
-
-        #add-multiple-toolbar {
-            display: flex;
-            flex: 1 1 auto;
-
-            & * {
-                display: flex;
-                flex: 1 1 auto;
-            }
         }
 
         * {
